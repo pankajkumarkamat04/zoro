@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { useAppDispatch } from '@/lib/hooks/redux';
+import { loginStart } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
 export default function LoginPage() {
@@ -11,6 +13,7 @@ export default function LoginPage() {
   const [isPhoneLogin, setIsPhoneLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -19,6 +22,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    dispatch(loginStart());
 
     try {
       const requestBody = isPhoneLogin 

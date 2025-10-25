@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { useAppDispatch } from '@/lib/hooks/redux';
+import { loginSuccess, loginFailure, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
 export default function OTPVerificationPage() {
@@ -11,6 +13,7 @@ export default function OTPVerificationPage() {
   const [loginData, setLoginData] = useState<{email: string, isPhoneLogin: boolean} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     // Get login data from localStorage
@@ -77,8 +80,7 @@ export default function OTPVerificationPage() {
         
         if (responseData.requiresRegistration) {
           toast.success('OTP verified. Please complete your registration.');
-          // Store phone number for registration page
-          localStorage.setItem('userPhone', responseData.phone);
+          // Don't store phone number - pass it via Redux or URL params if needed
           // Clear login data from localStorage
           localStorage.removeItem('loginData');
           // Navigate to registration page
@@ -89,18 +91,16 @@ export default function OTPVerificationPage() {
           // Handle existing user login response
           toast.success(responseData.message || 'OTP verified successfully! Welcome back.');
           
-          // Store token in localStorage
+          // Dispatch login success action
+          dispatch(loginSuccess({
+            user: responseData.user,
+            token: responseData.token
+          }));
+          
+          // Store only token in localStorage for persistence
           if (responseData.token) {
             localStorage.setItem('authToken', responseData.token);
           }
-          
-          // Store user data in localStorage
-          if (responseData.user) {
-            localStorage.setItem('userData', JSON.stringify(responseData.user));
-          }
-          
-          // Store user phone number in localStorage for future use
-          localStorage.setItem('userPhone', loginData.email);
           
           // Clear login data from localStorage
           localStorage.removeItem('loginData');
@@ -112,9 +112,11 @@ export default function OTPVerificationPage() {
         }
       } else {
         const errorData = await response.json();
+        dispatch(loginFailure(errorData.message || 'Invalid OTP. Please try again.'));
         toast.error(errorData.message || 'Invalid OTP. Please try again.');
       }
     } catch (error) {
+      dispatch(loginFailure('Network error. Please check your connection and try again.'));
       toast.error('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);

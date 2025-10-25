@@ -1,5 +1,10 @@
 import PaymentMethodsPage from '../components/PaymentMethodsPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function Checkout() {
-  return <PaymentMethodsPage />;
+  return (
+    <ProtectedRoute>
+      <PaymentMethodsPage />
+    </ProtectedRoute>
+  );
 }

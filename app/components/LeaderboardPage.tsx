@@ -1,28 +1,103 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
+interface LeaderboardPlayer {
+  _id: string;
+  totalPurchaseAmount: number;
+  purchaseCount: number;
+  name: string;
+  email: string;
+  avatar?: string | null;
+}
+
+interface LeaderboardData {
+  currentMonth: {
+    month: string;
+    leaderboard: LeaderboardPlayer[];
+  };
+  lastMonth: {
+    month: string;
+    leaderboard: LeaderboardPlayer[];
+  };
+}
+
 export default function LeaderboardPage() {
   const router = useRouter();
-  
-  const topThreePlayers = [
-    { rank: 2, name: "Name", score: "1000" },
-    { rank: 1, name: "Name", score: "1000" },
-    { rank: 3, name: "Name", score: "1000" }
-  ];
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const rankedPlayers = [
-    { rank: 4, name: "Name", score: "1000" },
-    { rank: 5, name: "Name", score: "1000" },
-    { rank: 6, name: "Name", score: "1000" },
-    { rank: 7, name: "Name", score: "1000" },
-    { rank: 8, name: "Name", score: "1000" },
-    { rank: 9, name: "Name", score: "1000" },
-    { rank: 10, name: "Name", score: "1000" },
-    { rank: 11, name: "Name", score: "1000" }
-  ];
+  useEffect(() => {
+    fetchLeaderboardData();
+  }, []);
+
+  const fetchLeaderboardData = async () => {
+    try {
+      setIsLoading(true);
+      const authToken = localStorage.getItem('authToken');
+      
+      if (!authToken) {
+        setError('Authentication token not found');
+        return;
+      }
+
+      const response = await fetch('https://api.leafstore.in/api/v1/user/leaderboard', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch leaderboard data');
+      }
+
+      const data = await response.json();
+      setLeaderboardData(data);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      setError('Failed to load leaderboard data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get top 3 players from current month leaderboard
+  const topThreePlayers = leaderboardData?.currentMonth?.leaderboard?.slice(0, 3) || [];
+  
+  // Get remaining players (ranks 4-11) from current month leaderboard
+  const rankedPlayers = leaderboardData?.currentMonth?.leaderboard?.slice(3, 11) || [];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-white text-xl">Loading leaderboard...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-white text-xl">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -34,6 +109,9 @@ export default function LeaderboardPage() {
       {/* Page Title */}
       <div className="px-4 mb-6">
         <h1 className="text-white font-bold text-2xl">Leaderboards</h1>
+        {leaderboardData?.currentMonth?.month && (
+          <p className="text-gray-400 text-sm mt-2">{leaderboardData.currentMonth.month}</p>
+        )}
       </div>
 
       {/* Top 3 Players */}
@@ -66,7 +144,7 @@ export default function LeaderboardPage() {
                   textAlign: 'center'
                 }}
               >
-                {topThreePlayers[0].name}
+                {topThreePlayers[0]?.name || 'Loading...'}
               </div>
               <div
                 className="px-3 py-1 rounded-3xl text-white text-sm mb-2 relative z-10"
@@ -78,7 +156,7 @@ export default function LeaderboardPage() {
                   fontSize: '16px'
                 }}
               >
-                {topThreePlayers[0].score}
+                ₹{topThreePlayers[0]?.totalPurchaseAmount?.toLocaleString() || '0'}
               </div>
               <div
                 className="mx-auto relative z-0"
@@ -119,7 +197,7 @@ export default function LeaderboardPage() {
                   textAlign: 'center'
                 }}
               >
-                {topThreePlayers[1].name}
+                {topThreePlayers[1]?.name || 'Loading...'}
               </div>
               <div
                 className="px-3 py-1 rounded-3xl text-white text-sm mb-2 relative z-10"
@@ -131,7 +209,7 @@ export default function LeaderboardPage() {
                   fontSize: '16px'
                 }}
               >
-                {topThreePlayers[1].score}
+                ₹{topThreePlayers[1]?.totalPurchaseAmount?.toLocaleString() || '0'}
               </div>
               <div
                 className="mx-auto relative z-0"
@@ -172,7 +250,7 @@ export default function LeaderboardPage() {
                   textAlign: 'center'
                 }}
               >
-                {topThreePlayers[2].name}
+                {topThreePlayers[2]?.name || 'Loading...'}
               </div>
               <div
                 className="px-3 py-1 rounded-3xl text-white text-sm mb-2 relative z-10"
@@ -184,7 +262,7 @@ export default function LeaderboardPage() {
                   fontSize: '16px'
                 }}
               >
-                {topThreePlayers[2].score}
+                ₹{topThreePlayers[2]?.totalPurchaseAmount?.toLocaleString() || '0'}
               </div>
               <div
                 className="mx-auto relative z-0"
@@ -205,7 +283,7 @@ export default function LeaderboardPage() {
         <div className="space-y-3">
           {rankedPlayers.map((player, index) => (
             <div
-              key={index}
+              key={player._id}
               className="flex items-center justify-between p-3 rounded-3xl cursor-pointer"
               style={{
                 background: '#7F8CAA',
@@ -224,7 +302,7 @@ export default function LeaderboardPage() {
                     letterSpacing: '0%'
                   }}
                 >
-                  #{player.rank}
+                  #{index + 4}
                 </span>
                 <span className="text-white text-sm mr-2">|</span>
                 <span
@@ -252,7 +330,7 @@ export default function LeaderboardPage() {
                   letterSpacing: '0%'
                 }}
               >
-                {player.score}
+                ₹{player.totalPurchaseAmount.toLocaleString()}
               </div>
             </div>
           ))}

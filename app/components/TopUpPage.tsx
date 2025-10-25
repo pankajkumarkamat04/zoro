@@ -1,24 +1,165 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
 export default function TopUpPage() {
   const router = useRouter();
+  const params = useParams();
+  const gameId = params?.gameId as string;
   
-  const diamondPacks = [
-    { diamonds: '100', bonus: '88 + 12(bonus)', price: '$1.99' },
-    { diamonds: '200', bonus: '176 + 24(bonus)', price: '$3.99' },
-    { diamonds: '500', bonus: '440 + 60(bonus)', price: '$9.99' }
-  ];
+  const [gameData, setGameData] = useState<{
+    _id: string;
+    name: string;
+    image: string;
+    productId: string;
+    publisher: string;
+    validationFields: string[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    ogcode?: string;
+  } | null>(null);
+  
+  const [diamondPacks, setDiamondPacks] = useState<Array<{
+    _id: string;
+    game: string;
+    amount: number;
+    commission: number;
+    cashback: number;
+    logo: string;
+    description: string;
+    status: string;
+    category: string;
+  }>>([]);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isValidating, setIsValidating] = useState(false);
+  const [formData, setFormData] = useState({
+    playerId: '',
+    serverId: ''
+  });
+  
+  useEffect(() => {
+    if (gameId) {
+      fetchDiamondPacks();
+    }
+  }, [gameId]);
+  
+  const fetchDiamondPacks = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://api.leafstore.in/api/v1/games/${gameId}/diamond-packs`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success) {
+          setGameData(responseData.gameData);
+          setDiamondPacks(responseData.diamondPacks);
+        }
+      } else {
+        console.error('Failed to fetch diamond packs');
+      }
+    } catch (error) {
+      console.error('Error fetching diamond packs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleValidate = async () => {
+    // Validation
+    if (!formData.playerId.trim()) {
+      toast.error('Please enter your Player ID');
+      return;
+    }
+    if (!formData.serverId.trim()) {
+      toast.error('Please enter your Server ID');
+      return;
+    }
+
+    setIsValidating(true);
+
+    try {
+      const response = await fetch(`https://api.leafstore.in/api/v1/games/validate-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gameId: gameId,
+          playerId: formData.playerId,
+          serverId: formData.serverId
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.response) {
+          toast.success('User validated successfully!');
+        } else {
+          toast.error(responseData.data?.msg || 'Invalid ID or Server');
+        }
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.data?.msg || 'Validation failed. Please try again.');
+      }
+    } catch (error) {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const filterButtons = [
     { name: 'Diamonds', icon: '/daimond.png', active: true },
     { name: 'Weekly Pass', icon: '/daimond.png', active: false },
     { name: 'First Recharge Bonus', icon: '/daimond.png', active: false }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading game data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
+        <div className="text-center">
+          <p className="text-white text-lg">Game not found</p>
+          <button 
+            onClick={() => router.back()}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -49,8 +190,8 @@ export default function TopUpPage() {
           <div className="flex items-center mb-6">
             <div className="relative mr-4">
               <Image
-                src="/game-logo.jpg"
-                alt="Mobile Legends"
+                src={gameData.image}
+                alt={gameData.name}
                 width={60}
                 height={60}
                 className="object-cover rounded-lg"
@@ -67,8 +208,8 @@ export default function TopUpPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Mobile Legends</h3>
-              <p className="text-gray-300 text-sm">Moonton</p>
+              <h3 className="text-white font-bold text-lg">{gameData.name}</h3>
+              <p className="text-gray-300 text-sm">{gameData.publisher}</p>
             </div>
           </div>
 
@@ -78,6 +219,9 @@ export default function TopUpPage() {
               <label className="text-white text-sm mb-2 block">Enter Your UID</label>
               <input
                 type="text"
+                name="playerId"
+                value={formData.playerId}
+                onChange={handleInputChange}
                 placeholder="Enter your UID"
                 className="w-full px-4 py-2 rounded-lg text-black placeholder-gray-500"
                 style={{ backgroundColor: '#D9D9D9' }}
@@ -87,6 +231,9 @@ export default function TopUpPage() {
               <label className="text-white text-sm mb-2 block">Enter Your Server ID</label>
               <input
                 type="text"
+                name="serverId"
+                value={formData.serverId}
+                onChange={handleInputChange}
                 placeholder="Enter your Server ID"
                 className="w-full px-4 py-2 rounded-lg text-black placeholder-gray-500"
                 style={{ backgroundColor: '#D9D9D9' }}
@@ -94,16 +241,17 @@ export default function TopUpPage() {
             </div>
             <div className="flex justify-center">
               <button
-                className="py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center cursor-pointer"
+                onClick={handleValidate}
+                disabled={isValidating}
+                className="py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'rgb(35, 36, 38)',
                   padding: '10px 30px',
                   borderRadius: '20px',
                   border: '1px solid #7F8CAA'
                 }}
-                onClick={() => router.push('/checkout')}
               >
-                Validate
+                {isValidating ? 'VALIDATING...' : 'Validate'}
                 <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
@@ -147,19 +295,46 @@ export default function TopUpPage() {
          <div className="grid grid-cols-3 gap-3">
           {diamondPacks.map((pack, index) => (
             <div
-              key={index}
+              key={pack._id}
               className="cursor-pointer"
               style={{
                 background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
                 borderRadius: '22px',
                 boxShadow: '0px 4px 4px 0px #00000040'
               }}
-              onClick={() => router.push('/checkout')}
+              onClick={() => {
+                // Validate form data before proceeding
+                if (!formData.playerId.trim()) {
+                  toast.error('Please enter your Player ID');
+                  return;
+                }
+                
+                if (!formData.serverId.trim()) {
+                  toast.error('Please enter your Server ID');
+                  return;
+                }
+
+                // Store pack details for checkout page
+                const packDetails = {
+                  packId: pack._id,
+                  gameId: gameId,
+                  gameName: gameData?.name,
+                  gameImage: gameData?.image,
+                  packDescription: pack.description,
+                  packAmount: pack.amount,
+                  packLogo: pack.logo,
+                  packCategory: pack.category,
+                  playerId: formData.playerId,
+                  serverId: formData.serverId
+                };
+                localStorage.setItem('selectedPack', JSON.stringify(packDetails));
+                router.push('/checkout');
+              }}
             >
               <div className="relative mb-6">
                 <Image
-                  src="/daimond.png"
-                  alt="Diamond Pack"
+                  src={pack.logo}
+                  alt={pack.description}
                   width={80}
                   height={80}
                   className="w-full h-20 object-cover rounded-lg"
@@ -184,8 +359,8 @@ export default function TopUpPage() {
                   fontSize: '12px',
                   lineHeight: '100%',
                   letterSpacing: '0%'
-                }}>{pack.diamonds} Diamonds</h3>
-                <p className="text-gray-300" style={{ fontSize: '10px' }}>{pack.bonus}</p>
+                }}>{pack.description}</h3>
+                <p className="text-gray-300" style={{ fontSize: '10px' }}>₹{pack.amount}</p>
               </div>
             </div>
           ))}

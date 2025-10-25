@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { useAppDispatch } from '@/lib/hooks/redux';
+import { registerStart, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
 export default function RegisterPage() {
@@ -15,6 +17,7 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -57,6 +60,7 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
+    dispatch(registerStart());
 
     try {
       const requestBody = {
@@ -77,14 +81,15 @@ export default function RegisterPage() {
       if (response.ok) {
         const responseData = await response.json();
         
-        // Store token in localStorage
+        // Dispatch register success action
+        dispatch(registerSuccess({
+          user: responseData.user,
+          token: responseData.token
+        }));
+        
+        // Store only token in localStorage for persistence
         if (responseData.token) {
           localStorage.setItem('authToken', responseData.token);
-        }
-        
-        // Store user data in localStorage
-        if (responseData.user) {
-          localStorage.setItem('userData', JSON.stringify(responseData.user));
         }
         
         toast.success(responseData.message || 'Registration successful! Welcome to Creds Zone.');
@@ -95,9 +100,11 @@ export default function RegisterPage() {
         }, 1500);
       } else {
         const errorData = await response.json();
+        dispatch(registerFailure(errorData.message || 'Registration failed. Please try again.'));
         toast.error(errorData.message || 'Registration failed. Please try again.');
       }
     } catch (error) {
+      dispatch(registerFailure('Network error. Please check your connection and try again.'));
       toast.error('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);

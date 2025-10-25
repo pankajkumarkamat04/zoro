@@ -7,51 +7,104 @@ import { FaPlus } from 'react-icons/fa';
 import { GiShoppingBag } from 'react-icons/gi';
 import { MdBarChart } from 'react-icons/md';
 import { BsFillSendFill } from 'react-icons/bs';
+import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
+import { logout } from '@/lib/store/authSlice';
 import BottomNavigation from './BottomNavigation';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [userPhone, setUserPhone] = useState<string>('');
-  const [userData, setUserData] = useState<{
-    name: string;
-    email: string;
-    phone: string;
-  } | null>(null);
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, token } = useAppSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<{
+    walletBalance: number;
+    orders: {
+      total: number;
+      completedCount: number;
+      successAmount: number;
+    };
+    transactions: {
+      total: number;
+      successfulCount: number;
+      successAmount: number;
+    };
+  } | null>(null);
+  const [games, setGames] = useState<Array<{
+    _id: string;
+    name: string;
+    image: string;
+    productId: string;
+    publisher: string;
+    validationFields: string[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    ogcode?: string;
+  }>>([]);
+  const [gamesLoading, setGamesLoading] = useState(true);
 
   useEffect(() => {
-    // Get stored phone number from localStorage
-    const storedPhone = localStorage.getItem('userPhone');
-    if (storedPhone) {
-      setUserPhone(storedPhone);
-    }
-    // Fetch user data using cookies
-    fetchUserData();
+    fetchDashboardData();
+    fetchGames();
   }, []);
 
-  const fetchUserData = async () => {
+  const fetchDashboardData = async () => {
     try {
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
       const response = await fetch('https://api.leafstore.in/api/v1/user/dashboard', {
-        method: 'POST',
+        method: 'GET',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // This will include cookies in the request
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        setUserData(userData);
-        // Store user data in localStorage for future use
-        localStorage.setItem('userData', JSON.stringify(userData));
+        const responseData = await response.json();
+        setDashboardData(responseData.data);
       } else {
-        console.error('Failed to fetch user data');
+        console.error('Failed to fetch dashboard data');
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching dashboard data:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchGames = async () => {
+    try {
+      setGamesLoading(true);
+      const response = await fetch('https://api.leafstore.in/api/v1/games/get-all', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success && responseData.games) {
+          setGames(responseData.games);
+        }
+      } else {
+        console.error('Failed to fetch games');
+      }
+    } catch (error) {
+      console.error('Error fetching games:', error);
+    } finally {
+      setGamesLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem('authToken');
+    router.push('/login');
   };
 
   const actionIcons = [
@@ -59,15 +112,6 @@ export default function DashboardPage() {
     { icon: '🛍️', label: 'Orders' },
     { icon: '📊', label: 'Leaderboard' },
     { icon: '✈️', label: 'Contact US' }
-  ];
-
-  const trendingGames = [
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' },
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' },
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' },
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' },
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' },
-    { name: 'Mobile Legends', developer: 'Moonton', icon: '/game-logo.jpg' }
   ];
 
   if (isLoading) {
@@ -133,7 +177,7 @@ export default function DashboardPage() {
                   className="mr-1"
                   style={{ color: 'transparent' }}
                 />
-                <span className="font-bold">250</span>
+                <span className="font-bold">{isLoading ? '...' : (dashboardData?.walletBalance || 0)}</span>
                 <span className="font-bold ml-1">+</span>
               </div>
             <div 
@@ -153,7 +197,7 @@ export default function DashboardPage() {
             Welcome,
           </h1>
           <h1 className="text-gray-300 font-bold mb-4" style={{ fontSize: '32px' }}>
-            {isLoading ? 'Loading...' : (userData?.name || userPhone || 'Username')}
+            {isLoading ? 'Loading...' : (user?.name || 'User')}
           </h1>
           <button className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10" style={{ backgroundColor: '#7F8CAA' }}>
             JOIN WHATSAPP CHANNEL
@@ -286,25 +330,64 @@ export default function DashboardPage() {
 
         {/* Games Grid */}
         <div className="grid grid-cols-3 gap-3 relative z-10">
-          {trendingGames.map((game, index) => (
+          {gamesLoading ? (
+            // Loading skeleton for games
+            Array.from({ length: 6 }).map((_, index) => (
+              <div 
+                key={index} 
+                className="flex items-center justify-center"
+                style={{ height: '170px' }}
+              >
+                <div 
+                  className="pt-10 animate-pulse"
+                  style={{ 
+                    background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
+                    borderRadius: '22px',
+                    height: '130px',
+                    width: '130px'
+                  }}
+                >
+                  <div className="relative mb-6">
+                    <div 
+                      className="w-20 h-20 bg-gray-400 rounded-lg mx-auto"
+                      style={{ margin: '-68px auto auto' }}
+                    ></div>
+                  </div>
+                  <div 
+                    className="text-left py-2 px-3 rounded-lg"
+                    style={{ 
+                      background: 'linear-gradient(90deg, rgb(54, 59, 72) 0%, rgb(51, 56, 68) 100%)',
+                      borderRadius: '22px'
+                    }}
+                  >
+                    <div className="h-3 bg-gray-400 rounded mb-1"></div>
+                    <div className="h-2 bg-gray-400 rounded w-3/4"></div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            games.slice(0, 6).map((game, index) => (
             <div 
-              key={index} 
+              key={game._id} 
               className="flex items-center justify-center cursor-pointer"
               style={{ 
                 height: '170px'
               }}
-              onClick={() => router.push('/topup')}
+              onClick={() => router.push(`/topup/${game._id}`)}
             >
               <div 
                 className="pt-10"
                 style={{ 
                   background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
-                  borderRadius: '22px'
+                  borderRadius: '22px',
+                  height: '130px',
+                  width: '130px'
                 }}
               >
                 <div className="relative mb-6">
                   <Image
-                    src="/game-logo.jpg"
+                    src={game.image}
                     alt={game.name}
                     width={80}
                     height={80}
@@ -329,11 +412,12 @@ export default function DashboardPage() {
                   }}
                 >
                   <h3 className="text-white font-medium mb-1" style={{ fontSize: '12px' }}>{game.name}</h3>
-                  <p className="text-gray-300" style={{ fontSize: '10px' }}>{game.developer}</p>
+                  <p className="text-gray-300" style={{ fontSize: '10px' }}>{game.publisher}</p>
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

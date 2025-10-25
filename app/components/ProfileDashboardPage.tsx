@@ -1,32 +1,173 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
 export default function ProfileDashboardPage() {
   const router = useRouter();
-  
-  const [userData, setUserData] = useState({
-    fullName: 'Username',
-    email: 'user@gmail.com',
-    password: '**********'
+  const [userData, setUserData] = useState<{
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    verified: boolean;
+    walletBalance: number;
+    role: string;
+    profilePicture: string | null;
+  } | null>(null);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    currentPassword: '',
+    password: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUserData(userData);
+        setFormData({
+          fullName: userData.name,
+          email: userData.email,
+          currentPassword: '',
+          password: ''
+        });
+      } else {
+        console.error('Failed to fetch user data');
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setUserData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleUpdate = () => {
-    // Handle update logic here
-    console.log('User data updated:', userData);
+  const handleUpdate = async () => {
+    // Validation
+    if (!formData.fullName.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+    if (!formData.email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+    if (!formData.currentPassword.trim()) {
+      toast.error('Please enter your current password');
+      return;
+    }
+    if (!formData.password.trim()) {
+      toast.error('Please enter your new password');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    // Password length validation
+    if (formData.password.length < 6) {
+      toast.error('New password must be at least 6 characters long');
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const requestBody = {
+        name: formData.fullName,
+        email: formData.email,
+        currentPassword: formData.currentPassword,
+        password: formData.password
+      };
+
+      const response = await fetch('https://api.leafstore.in/api/v1/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        toast.success(responseData.message || 'Profile updated successfully!');
+        
+        // Clear password fields
+        setFormData(prev => ({
+          ...prev,
+          currentPassword: '',
+          password: ''
+        }));
+        
+        // Refresh user data
+        fetchUserData();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsUpdating(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -56,7 +197,7 @@ export default function ProfileDashboardPage() {
           className="text-white font-bold text-2xl"
           style={{ fontSize: '24px' }}
         >
-          Welcome <span style={{ color: '#7F8CAA' }}>Username</span>
+          Welcome <span style={{ color: '#7F8CAA' }}>{userData?.name || 'User'}</span>
         </h1>
       </div>
 
@@ -97,9 +238,9 @@ export default function ProfileDashboardPage() {
                 className="text-white font-bold"
                 style={{ fontSize: '16px' }}
               >
-                Username
+                {userData?.name || 'User'}
               </h3>
-              <p className="text-gray-400 text-sm">+91 123456789</p>
+              <p className="text-gray-400 text-sm">+91 {userData?.phone || '123456789'}</p>
             </div>
           </div>
 
@@ -110,7 +251,7 @@ export default function ProfileDashboardPage() {
               <input
                 type="text"
                 name="fullName"
-                value={userData.fullName}
+                value={formData.fullName}
                 onChange={handleInputChange}
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
@@ -122,7 +263,7 @@ export default function ProfileDashboardPage() {
               <input
                 type="email"
                 name="email"
-                value={userData.email}
+                value={formData.email}
                 onChange={handleInputChange}
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
@@ -130,12 +271,26 @@ export default function ProfileDashboardPage() {
             </div>
 
             <div>
-              <label className="text-white text-sm mb-2 block">Password</label>
+              <label className="text-white text-sm mb-2 block">Current Password</label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleInputChange}
+                placeholder="Enter your current password"
+                className="w-full px-2 py-2 rounded-lg text-gray-400"
+                style={{ backgroundColor: '#D9D9D9' }}
+              />
+            </div>
+
+            <div>
+              <label className="text-white text-sm mb-2 block">New Password</label>
               <input
                 type="password"
                 name="password"
-                value={userData.password}
+                value={formData.password}
                 onChange={handleInputChange}
+                placeholder="Enter your new password"
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
               />
@@ -146,7 +301,8 @@ export default function ProfileDashboardPage() {
           <div className="flex justify-center mt-6">
             <button
               onClick={handleUpdate}
-              className="text-white font-bold"
+              disabled={isUpdating}
+              className="text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ 
                 backgroundColor: '#232426',
                 boxShadow: '0px 4px 4px 0px #00000040',
@@ -156,7 +312,7 @@ export default function ProfileDashboardPage() {
                 border: '1px solid #7F8CAA'
               }}
             >
-              Update
+              {isUpdating ? 'UPDATING...' : 'Update'}
             </button>
           </div>
         </div>
@@ -210,7 +366,7 @@ export default function ProfileDashboardPage() {
                 fontWeight: 600
               }}
             >
-              1000 coins
+              {userData?.walletBalance || 0} coins
             </div>
           </div>
 

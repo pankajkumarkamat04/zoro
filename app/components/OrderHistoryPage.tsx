@@ -2,44 +2,186 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
+interface OrderItem {
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  price: number;
+  _id: string;
+}
+
+interface Order {
+  _id: string;
+  userId: string;
+  orderType: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  manualOrder: boolean;
+  paymentMethod: string;
+  items: OrderItem[];
+  description: string;
+  nextStatusCheck: string;
+  statusCheckCount: number;
+  maxStatusChecks: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface OrderHistoryResponse {
+  success: boolean;
+  orders: Order[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalOrders: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 export default function OrderHistoryPage() {
   const router = useRouter();
-  
-  const orders = [
-    {
-      orderDate: "20 June 2025 at 09:39:45",
-      orderId: "9284919695620942",
-      product: "Mobile Legends",
-      orderDetails: "55 Diamonds",
-      price: "65 INR",
-      userId: "4723503273",
-      zoneId: "3369",
-      status: "Success"
-    },
-    {
-      orderDate: "19 June 2025 at 14:22:18",
-      orderId: "9284919695620943",
-      product: "Mobile Legends",
-      orderDetails: "100 Diamonds",
-      price: "120 INR",
-      userId: "4723503274",
-      zoneId: "3370",
-      status: "Failed"
-    },
-    {
-      orderDate: "18 June 2025 at 11:15:30",
-      orderId: "9284919695620944",
-      product: "Mobile Legends",
-      orderDetails: "200 Diamonds",
-      price: "240 INR",
-      userId: "4723503275",
-      zoneId: "3371",
-      status: "Success"
+  const [orderData, setOrderData] = useState<OrderHistoryResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchOrderId, setSearchOrderId] = useState('');
+  const [searchDate, setSearchDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchOrderHistory();
+  }, [currentPage]);
+
+  const fetchOrderHistory = async () => {
+    try {
+      setIsLoading(true);
+      const authToken = localStorage.getItem('authToken');
+      
+      if (!authToken) {
+        setError('Authentication token not found');
+        return;
+      }
+
+      // Build query parameters
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10'
+      });
+
+      // Add optional parameters if they have values
+      if (searchDate) {
+        queryParams.append('dateFrom', searchDate);
+      }
+      if (searchOrderId) {
+        queryParams.append('orderId', searchOrderId);
+      }
+      if (statusFilter) {
+        queryParams.append('status', statusFilter);
+      }
+
+      const response = await fetch(`https://api.leafstore.in/api/v1/order/history?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch order history');
+      }
+
+      const data = await response.json();
+      setOrderData(data);
+    } catch (error) {
+      console.error('Error fetching order history:', error);
+      setError('Failed to load order history');
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
+  const parseDescription = (description: string): { playerId: string; server: string } => {
+    try {
+      const parsed = JSON.parse(description);
+      return {
+        playerId: parsed.playerId || 'N/A',
+        server: parsed.server || 'N/A'
+      };
+    } catch {
+      return {
+        playerId: 'N/A',
+        server: 'N/A'
+      };
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'success':
+        return 'text-green-400';
+      case 'pending':
+        return 'text-yellow-400';
+      case 'failed':
+      case 'cancelled':
+        return 'text-red-400';
+      default:
+        return 'text-white';
+    }
+  };
+
+  const handleSearch = () => {
+    // Reset to first page when searching
+    setCurrentPage(1);
+    fetchOrderHistory();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-white text-xl">Loading order history...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-white text-xl">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -51,6 +193,11 @@ export default function OrderHistoryPage() {
       {/* Page Title */}
       <div className="px-4 mb-6">
         <h1 className="text-white font-bold text-2xl">Order History</h1>
+        {orderData?.pagination && (
+          <p className="text-gray-400 text-sm mt-2">
+            Showing {orderData?.orders?.length || 0} of {orderData?.pagination?.totalOrders || 0} orders
+          </p>
+        )}
       </div>
 
       {/* Search and Filter Section */}
@@ -63,6 +210,8 @@ export default function OrderHistoryPage() {
               placeholder="search by order id"
               className="w-full px-4 py-3 rounded-lg text-black placeholder-gray-500"
               style={{ backgroundColor: '#D9D9D9' }}
+              value={searchOrderId}
+              onChange={(e) => setSearchOrderId(e.target.value)}
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
@@ -71,7 +220,7 @@ export default function OrderHistoryPage() {
             </div>
           </div>
 
-          {/* Date Input and Search Button */}
+          {/* Date Input, Status Filter and Search Button */}
           <div className="flex space-x-3">
             <div className="relative flex-1">
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -84,11 +233,28 @@ export default function OrderHistoryPage() {
                 placeholder="dd-mm-yyyy"
                 className="w-full pl-10 pr-4 py-3 rounded-lg text-black placeholder-gray-500"
                 style={{ backgroundColor: '#D9D9D9' }}
+                value={searchDate}
+                onChange={(e) => setSearchDate(e.target.value)}
               />
+            </div>
+            <div className="relative flex-1">
+              <select 
+                className="w-full px-4 py-3 rounded-lg text-black"
+                style={{ backgroundColor: '#D9D9D9' }}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
             <button 
               className="px-6 py-3 rounded-lg text-white font-medium"
               style={{ backgroundColor: '#363B48' }}
+              onClick={handleSearch}
             >
               search
             </button>
@@ -99,53 +265,76 @@ export default function OrderHistoryPage() {
       {/* Order List */}
       <div className="px-4 mb-8">
         <div className="space-y-4">
-          {orders.map((order, index) => (
-            <div 
-              key={index}
-              className="p-4 rounded-lg cursor-pointer"
-              style={{ 
-                background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
-                boxShadow: '0px 4px 4px 0px #00000040'
-              }}
-              onClick={() => router.push('/topup')}
-            >
-              <div className="flex">
-                {/* Left Column - Labels */}
-                <div className="w-1/3 space-y-3">
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
-                </div>
+          {orderData?.orders?.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-white text-lg">No orders found</div>
+              <div className="text-gray-400 text-sm mt-2">You haven't placed any orders yet</div>
+            </div>
+          ) : (
+            orderData?.orders?.map((order) => {
+              const descriptionData = parseDescription(order.description);
+              const orderItem = order.items[0]; // Get first item for display
+              
+              return (
+                <div 
+                  key={order._id}
+                  className="p-4 rounded-lg"
+                  style={{ 
+                    background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
+                    boxShadow: '0px 4px 4px 0px #00000040'
+                  }}
+                >
+                  <div className="flex">
+                    {/* Left Column - Labels */}
+                    <div className="w-1/3 space-y-3">
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
+                    </div>
 
-                {/* Vertical Divider */}
-                <div className="w-px bg-white mx-4"></div>
+                    {/* Vertical Divider */}
+                    <div className="w-px bg-white mx-4"></div>
 
-                {/* Right Column - Values */}
-                <div className="flex-1 space-y-3">
-                  <div className="text-green-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.orderDate}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.orderId}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.product}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.orderDetails}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.price}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.userId}</div>
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>{order.zoneId}</div>
-                  <div 
-                    className={`text-sm font-medium ${
-                      order.status === 'Success' ? 'text-green-400' : 'text-red-400'
-                    }`}
-                    style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
-                  >
-                    {order.status}
+                    {/* Right Column - Values */}
+                    <div className="flex-1 space-y-3">
+                      <div className="text-green-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {formatDate(order.createdAt)}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {order.orderId}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {orderItem?.itemName || 'N/A'}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {orderItem?.itemName || 'N/A'}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        ₹{order.amount} {order.currency}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {descriptionData.playerId}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {descriptionData.server}
+                      </div>
+                      <div 
+                        className={`text-sm font-medium ${getStatusColor(order.status)}`}
+                        style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
+                      >
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
 

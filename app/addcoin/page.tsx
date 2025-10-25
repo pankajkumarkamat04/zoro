@@ -1,5 +1,10 @@
 import AddCoinPage from '../components/AddCoinPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function AddCoin() {
-  return <AddCoinPage />;
+  return (
+    <ProtectedRoute>
+      <AddCoinPage />
+    </ProtectedRoute>
+  );
 }

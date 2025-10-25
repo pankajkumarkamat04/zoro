@@ -1,5 +1,10 @@
 import LoginPage from '../components/LoginPage';
+import PublicRoute from '../components/PublicRoute';
 
 export default function Login() {
-  return <LoginPage />;
+  return (
+    <PublicRoute>
+      <LoginPage />
+    </PublicRoute>
+  );
 }

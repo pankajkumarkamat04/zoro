@@ -1,5 +1,10 @@
 import OTPVerificationPage from '../components/OTPVerificationPage';
+import PublicRoute from '../components/PublicRoute';
 
 export default function OTPVerification() {
-  return <OTPVerificationPage />;
+  return (
+    <PublicRoute>
+      <OTPVerificationPage />
+    </PublicRoute>
+  );
 }

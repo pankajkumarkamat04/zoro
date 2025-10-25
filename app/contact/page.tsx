@@ -1,5 +1,10 @@
 import ContactUsPage from '../components/ContactUsPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function Contact() {
-  return <ContactUsPage />;
+  return (
+    <ProtectedRoute>
+      <ContactUsPage />
+    </ProtectedRoute>
+  );
 }

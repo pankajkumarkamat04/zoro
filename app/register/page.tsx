@@ -1,5 +1,10 @@
 import RegisterPage from '../components/RegisterPage';
+import PublicRoute from '../components/PublicRoute';
 
 export default function Register() {
-  return <RegisterPage />;
+  return (
+    <PublicRoute>
+      <RegisterPage />
+    </PublicRoute>
+  );
 }

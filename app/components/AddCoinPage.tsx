@@ -2,11 +2,16 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
 export default function AddCoinPage() {
   const router = useRouter();
+  const [selectedAmount, setSelectedAmount] = useState<string>('');
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const coinPacks = [
     { amount: '250' },
@@ -16,6 +21,72 @@ export default function AddCoinPage() {
     { amount: '2000' },
     { amount: '2500' }
   ];
+
+  const handleCoinPackSelect = (amount: string) => {
+    setSelectedAmount(amount);
+    setCustomAmount(amount); // Auto-fill the input with the selected amount
+  };
+
+  const handleCustomAmountChange = (value: string) => {
+    setCustomAmount(value);
+    setSelectedAmount(''); // Clear selected pack when entering custom amount
+  };
+
+  const handlePayment = async () => {
+    const amount = selectedAmount || customAmount;
+    
+    // Validation
+    if (!amount.trim()) {
+      toast.error('Please select an amount or enter a custom amount');
+      return;
+    }
+
+    const amountNumber = parseInt(amount);
+    if (isNaN(amountNumber) || amountNumber < 100) {
+      toast.error('Minimum amount should be greater than 100');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch('https://api.leafstore.in/api/v1/wallet/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amountNumber,
+          redirectUrl: "https://leafstore.in"
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success && responseData.transaction?.paymentUrl) {
+          toast.success('Redirecting to payment...');
+          // Redirect to payment URL
+          window.location.href = responseData.transaction.paymentUrl;
+        } else {
+          toast.error('Failed to create payment request');
+        }
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Payment request failed');
+      }
+    } catch (error) {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -73,15 +144,15 @@ export default function AddCoinPage() {
           {coinPacks.map((pack, index) => (
             <div 
               key={index}
-              className={`flex flex-col items-center rounded-3xl cursor-pointer ${
+              className={`flex flex-col items-center rounded-3xl cursor-pointer transition-all ${
                 pack.amount === '1000' ? 'p-2' : 'p-4'
-              }`}
+              } ${selectedAmount === pack.amount ? 'ring-2 ring-blue-500' : ''}`}
               style={{ 
                 background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                 boxShadow: 'rgba(0, 0, 0, 0.25) 0px 4px 4px 0px',
                 border: '3px solid white'
               }}
-              onClick={() => router.push('/checkout')}
+              onClick={() => handleCoinPackSelect(pack.amount)}
             >
               <div className="mb-3">
                 <Image
@@ -113,7 +184,9 @@ export default function AddCoinPage() {
       <div className="px-4 mb-8">
         <div className="space-y-3">
           <input 
-            type="text" 
+            type="number" 
+            value={customAmount}
+            onChange={(e) => handleCustomAmountChange(e.target.value)}
             placeholder="enter amount"
             className="w-full px-4 py-3 rounded-lg text-black placeholder-gray-500"
             style={{ backgroundColor: '#D9D9D9' }}
@@ -124,16 +197,17 @@ export default function AddCoinPage() {
           
           <div className="flex justify-center">
             <button 
-              className="rounded-3xl text-white font-bold text-lg cursor-pointer"
+              onClick={handlePayment}
+              disabled={isProcessing}
+              className="rounded-3xl text-white font-bold text-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ 
                 background: '#7F8CAA',
                 boxShadow: '0px 4px 4px 0px #00000040',
                 border: '2px solid white',
                 padding: '10px 130px'
               }}
-              onClick={() => router.push('/checkout')}
             >
-              PAY ONLINE
+              {isProcessing ? 'PROCESSING...' : 'PAY ONLINE'}
             </button>
           </div>
         </div>

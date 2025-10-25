@@ -1,5 +1,10 @@
 import OrderHistoryPage from '../components/OrderHistoryPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function OrderHistory() {
-  return <OrderHistoryPage />;
+  return (
+    <ProtectedRoute>
+      <OrderHistoryPage />
+    </ProtectedRoute>
+  );
 }

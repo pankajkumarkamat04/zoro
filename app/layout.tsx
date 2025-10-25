@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReduxProvider from './components/ReduxProvider';
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,7 +26,9 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} antialiased`}
       >
-        {children}
+        <ReduxProvider>
+          {children}
+        </ReduxProvider>
         <ToastContainer
           position="top-center"
           autoClose={3000}
