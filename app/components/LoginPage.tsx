@@ -8,7 +8,11 @@ import { useAppDispatch } from '@/lib/hooks/redux';
 import { loginStart } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
-export default function LoginPage() {
+interface LoginPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [isPhoneLogin, setIsPhoneLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +50,11 @@ export default function LoginPage() {
         }));
         // Navigate after a short delay to show the success toast
         setTimeout(() => {
-          router.push('/otp-verification');
+          if (onNavigate) {
+            onNavigate('otp-verification');
+          } else {
+            router.push('/otp-verification');
+          }
         }, 1500);
       } else {
         const errorData = await response.json();
@@ -139,7 +147,7 @@ export default function LoginPage() {
             new user?
           </span>
           <button 
-            onClick={() => router.push('/register')}
+            onClick={() => onNavigate ? onNavigate('register') : router.push('/register')}
             className="text-white hover:opacity-80 transition-colors font-medium"
             style={{ fontSize: '16px', color: '#7F8CAA' }}
           >

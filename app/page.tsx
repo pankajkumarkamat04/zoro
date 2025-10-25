@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import DesktopRedirect from './components/DesktopRedirect';
 
 export default function Home() {
-  redirect('/login');
+  return <DesktopRedirect />;
 }

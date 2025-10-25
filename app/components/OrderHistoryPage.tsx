@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAppSelector } from '@/lib/hooks/redux';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -45,10 +46,15 @@ interface OrderHistoryResponse {
   };
 }
 
-export default function OrderHistoryPage() {
+interface OrderHistoryPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps = {}) {
   const router = useRouter();
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
   const [orderData, setOrderData] = useState<OrderHistoryResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [error, setError] = useState<string | null>(null);
   const [searchOrderId, setSearchOrderId] = useState('');
   const [searchDate, setSearchDate] = useState('');
@@ -56,15 +62,28 @@ export default function OrderHistoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetchOrderHistory();
-  }, [currentPage]);
+    // Only fetch data if user is authenticated
+    if (isAuthenticated && token) {
+      fetchOrderHistory();
+    } else if (!isAuthenticated) {
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [currentPage, isAuthenticated, token]);
+
+  // Update loading state when authentication changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const fetchOrderHistory = async () => {
     try {
-      setIsLoading(true);
-      const authToken = localStorage.getItem('authToken');
-      
-      if (!authToken) {
+      if (!token) {
         setError('Authentication token not found');
         return;
       }
@@ -89,7 +108,7 @@ export default function OrderHistoryPage() {
       const response = await fetch(`https://api.leafstore.in/api/v1/order/history?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -103,9 +122,8 @@ export default function OrderHistoryPage() {
     } catch (error) {
       console.error('Error fetching order history:', error);
       setError('Failed to load order history');
-    } finally {
-      setIsLoading(false);
     }
+    // Remove setIsLoading(false) from here - loading state is managed by auth state
   };
 
   const formatDate = (dateString: string) => {
@@ -157,7 +175,8 @@ export default function OrderHistoryPage() {
     fetchOrderHistory();
   };
 
-  if (isLoading) {
+  // Only show loading screen if user is not authenticated yet
+  if (isLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
         <div className="relative z-10">

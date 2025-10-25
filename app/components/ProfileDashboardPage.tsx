@@ -4,11 +4,18 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { FiEdit2 } from 'react-icons/fi';
+import { useAppSelector } from '@/lib/hooks/redux';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
-export default function ProfileDashboardPage() {
+interface ProfileDashboardPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPageProps = {}) {
   const router = useRouter();
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
   const [userData, setUserData] = useState<{
     _id: string;
     name: string;
@@ -25,18 +32,37 @@ export default function ProfileDashboardPage() {
     currentPassword: '',
     password: ''
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    // Only fetch data if user is authenticated
+    if (isAuthenticated && token) {
+      fetchUserData();
+    } else if (!isAuthenticated) {
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isAuthenticated, token]);
+
+  // Update loading state when authentication changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
       if (!token) {
+        if (onNavigate) {
+        onNavigate('login');
+      } else {
         router.push('/login');
+      }
         return;
       }
 
@@ -59,11 +85,19 @@ export default function ProfileDashboardPage() {
         });
       } else {
         console.error('Failed to fetch user data');
+        if (onNavigate) {
+        onNavigate('login');
+      } else {
         router.push('/login');
+      }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
-      router.push('/login');
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -78,35 +112,28 @@ export default function ProfileDashboardPage() {
   };
 
   const handleUpdate = async () => {
-    // Validation
+    // Validation - name is required
     if (!formData.fullName.trim()) {
       toast.error('Please enter your name');
       return;
     }
-    if (!formData.email.trim()) {
-      toast.error('Please enter your email');
-      return;
-    }
-    if (!formData.currentPassword.trim()) {
-      toast.error('Please enter your current password');
-      return;
-    }
-    if (!formData.password.trim()) {
-      toast.error('Please enter your new password');
-      return;
-    }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-
-    // Password length validation
-    if (formData.password.length < 6) {
-      toast.error('New password must be at least 6 characters long');
-      return;
+    // If password fields are filled, validate them
+    const isChangingPassword = formData.currentPassword.trim() || formData.password.trim();
+    
+    if (isChangingPassword) {
+      if (!formData.currentPassword.trim()) {
+        toast.error('Please enter your current password');
+        return;
+      }
+      if (!formData.password.trim()) {
+        toast.error('Please enter your new password');
+        return;
+      }
+      if (formData.password.length < 6) {
+        toast.error('New password must be at least 6 characters long');
+        return;
+      }
     }
 
     setIsUpdating(true);
@@ -114,16 +141,26 @@ export default function ProfileDashboardPage() {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
+        if (onNavigate) {
+        onNavigate('login');
+      } else {
         router.push('/login');
+      }
         return;
       }
 
-      const requestBody = {
-        name: formData.fullName,
-        email: formData.email,
-        currentPassword: formData.currentPassword,
-        password: formData.password
+      // Build request body - only include password fields if they're not empty
+      const requestBody: any = {
+        name: formData.fullName
       };
+
+      // Only add password fields if they're provided
+      if (formData.currentPassword.trim()) {
+        requestBody.currentPassword = formData.currentPassword;
+      }
+      if (formData.password.trim()) {
+        requestBody.password = formData.password;
+      }
 
       const response = await fetch('https://api.leafstore.in/api/v1/user/profile', {
         method: 'PUT',
@@ -136,14 +173,8 @@ export default function ProfileDashboardPage() {
 
       if (response.ok) {
         const responseData = await response.json();
-        toast.success(responseData.message || 'Profile updated successfully!');
-        
-        // Clear password fields
-        setFormData(prev => ({
-          ...prev,
-          currentPassword: '',
-          password: ''
-        }));
+        const updateType = isChangingPassword ? 'Profile' : 'Name';
+        toast.success(responseData.message || `${updateType} updated successfully!`);
         
         // Refresh user data
         fetchUserData();
@@ -158,7 +189,8 @@ export default function ProfileDashboardPage() {
     }
   };
 
-  if (isLoading) {
+  // Only show loading screen if user is not authenticated yet
+  if (isLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
         <div className="text-center">
@@ -228,9 +260,11 @@ export default function ProfileDashboardPage() {
                   U
                 </span>
                 <div 
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full"
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: 'white' }}
-                ></div>
+                >
+                  <FiEdit2 className="w-2.5 h-2.5" style={{ color: '#232426' }} />
+                </div>
               </div>
             </div>
             <div>
@@ -277,7 +311,7 @@ export default function ProfileDashboardPage() {
                 name="currentPassword"
                 value={formData.currentPassword}
                 onChange={handleInputChange}
-                placeholder="Enter your current password"
+                placeholder="Enter current password to change password"
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
               />
@@ -290,7 +324,7 @@ export default function ProfileDashboardPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="Enter your new password"
+                placeholder="Enter new password"
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
               />
@@ -312,7 +346,7 @@ export default function ProfileDashboardPage() {
                 border: '1px solid #7F8CAA'
               }}
             >
-              {isUpdating ? 'UPDATING...' : 'Update'}
+              {isUpdating ? 'UPDATING...' : 'Update Profile'}
             </button>
           </div>
         </div>
@@ -375,7 +409,7 @@ export default function ProfileDashboardPage() {
             {/* Orders Button */}
             <div 
               className="flex flex-col items-center cursor-pointer"
-              onClick={() => router.push('/orders')}
+              onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
             >
               <div 
                 className="rounded-2xl flex items-center justify-center mb-2"
@@ -414,7 +448,7 @@ export default function ProfileDashboardPage() {
             {/* Cart Button */}
             <div 
               className="flex flex-col items-center cursor-pointer"
-              onClick={() => router.push('/topup')}
+              onClick={() => onNavigate ? onNavigate('topup') : router.push('/topup')}
             >
               <div 
                 className="rounded-2xl flex items-center justify-center mb-2"
@@ -453,7 +487,7 @@ export default function ProfileDashboardPage() {
             {/* Queries Button */}
             <div 
               className="flex flex-col items-center cursor-pointer"
-              onClick={() => router.push('/contact')}
+              onClick={() => onNavigate ? onNavigate('contact') : router.push('/contact')}
             >
               <div 
                 className="rounded-2xl flex items-center justify-center mb-2"

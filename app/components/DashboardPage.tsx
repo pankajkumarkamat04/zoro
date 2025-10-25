@@ -10,12 +10,17 @@ import { BsFillSendFill } from 'react-icons/bs';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
 import { logout } from '@/lib/store/authSlice';
 import BottomNavigation from './BottomNavigation';
+import SideMenu from './SideMenu';
 
-export default function DashboardPage() {
+interface DashboardPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, token } = useAppSelector((state) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [dashboardData, setDashboardData] = useState<{
     walletBalance: number;
     orders: {
@@ -42,16 +47,38 @@ export default function DashboardPage() {
     ogcode?: string;
   }>>([]);
   const [gamesLoading, setGamesLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetchDashboardData();
-    fetchGames();
-  }, []);
+    // Only fetch data if user is authenticated
+    if (isAuthenticated && token) {
+      fetchDashboardData();
+      fetchGames();
+    } else if (!isAuthenticated) {
+      // If not authenticated, redirect to login
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isAuthenticated, token]);
+
+  // Update loading state when authentication changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const fetchDashboardData = async () => {
     try {
       if (!token) {
-        router.push('/login');
+        if (onNavigate) {
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
         return;
       }
 
@@ -71,9 +98,8 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-    } finally {
-      setIsLoading(false);
     }
+    // Remove setIsLoading(false) from here - loading state is managed by auth state
   };
 
   const fetchGames = async () => {
@@ -104,7 +130,11 @@ export default function DashboardPage() {
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem('authToken');
-    router.push('/login');
+    if (onNavigate) {
+      onNavigate('login');
+    } else {
+      router.push('/login');
+    }
   };
 
   const actionIcons = [
@@ -114,7 +144,8 @@ export default function DashboardPage() {
     { icon: '✈️', label: 'Contact US' }
   ];
 
-  if (isLoading) {
+  // Only show loading screen if user is not authenticated yet
+  if (isLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
         <div className="text-center">
@@ -140,11 +171,14 @@ export default function DashboardPage() {
          {/* Top Navigation */}
          <div className="flex items-center justify-between mb-6 relative z-10">
            {/* Menu Icon */}
-           <div className="w-6 h-6 flex flex-col justify-center">
+           <button 
+             onClick={() => setIsMenuOpen(true)}
+             className="w-6 h-6 flex flex-col justify-center"
+           >
              <div className="w-full h-0.5 bg-white mb-1"></div>
              <div className="w-full h-0.5 bg-white mb-1"></div>
              <div className="w-full h-0.5 bg-white"></div>
-           </div>
+           </button>
 
            {/* Logo - Center */}
            <div className="flex items-center justify-center" style={{ marginLeft: '92px' }}>
@@ -167,7 +201,7 @@ export default function DashboardPage() {
                   fontSize: '14px',
                   border: '1px solid #7F8CAA'
                 }}
-                onClick={() => router.push('/addcoin')}
+                onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
               >
                 <Image
                   src="/coin.png"
@@ -182,7 +216,7 @@ export default function DashboardPage() {
               </div>
             <div 
               className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer"
-              onClick={() => router.push('/profile')}
+              onClick={() => onNavigate ? onNavigate('profile') : router.push('/profile')}
             >
               <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#232426' }}>
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -238,7 +272,7 @@ export default function DashboardPage() {
         {/* Add Coins */}
         <div 
           className="flex flex-col items-center cursor-pointer"
-          onClick={() => router.push('/addcoin')}
+          onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
         >
           <div 
             className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
@@ -256,7 +290,7 @@ export default function DashboardPage() {
         {/* Orders */}
         <div 
           className="flex flex-col items-center cursor-pointer"
-          onClick={() => router.push('/orders')}
+          onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
         >
           <div 
             className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
@@ -274,7 +308,7 @@ export default function DashboardPage() {
         {/* Leaderboard */}
         <div 
           className="flex flex-col items-center cursor-pointer"
-          onClick={() => router.push('/leaderboard')}
+          onClick={() => onNavigate ? onNavigate('leaderboard') : router.push('/leaderboard')}
         >
           <div 
             className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
@@ -292,7 +326,7 @@ export default function DashboardPage() {
         {/* Contact US */}
         <div 
           className="flex flex-col items-center cursor-pointer"
-          onClick={() => router.push('/contact')}
+          onClick={() => onNavigate ? onNavigate('contact') : router.push('/contact')}
         >
           <div 
             className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
@@ -374,7 +408,7 @@ export default function DashboardPage() {
               style={{ 
                 height: '170px'
               }}
-              onClick={() => router.push(`/topup/${game._id}`)}
+              onClick={() => onNavigate ? onNavigate(`topup/${game._id}`) : router.push(`/topup/${game._id}`)}
             >
               <div 
                 className="pt-10"
@@ -426,6 +460,9 @@ export default function DashboardPage() {
       
       {/* Bottom spacing for navigation */}
       <div className="h-15"></div>
+
+      {/* Side Menu */}
+      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
 
   );

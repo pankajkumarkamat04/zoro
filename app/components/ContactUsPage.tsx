@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
-export default function ContactUsPage() {
+interface ContactUsPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -30,7 +34,11 @@ export default function ContactUsPage() {
     console.log('Form submitted:', formData);
     alert('Your query has been submitted!');
     setFormData({ email: '', phone: '', name: '', issue: '' }); // Clear form
-    router.push('/dashboard'); // Navigate back to dashboard after submission
+    if (onNavigate) {
+      onNavigate('home');
+    } else {
+      router.push('/dashboard'); // Navigate back to dashboard after submission
+    }
   };
 
   return (

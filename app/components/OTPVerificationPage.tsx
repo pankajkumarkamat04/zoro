@@ -8,7 +8,11 @@ import { useAppDispatch } from '@/lib/hooks/redux';
 import { loginSuccess, loginFailure, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
-export default function OTPVerificationPage() {
+interface OTPVerificationPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageProps) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit OTP
   const [loginData, setLoginData] = useState<{email: string, isPhoneLogin: boolean} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +26,11 @@ export default function OTPVerificationPage() {
       setLoginData(JSON.parse(storedData));
     } else {
       // If no login data, redirect to login page
-      router.push('/login');
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
     }
   }, [router]);
 
@@ -85,7 +93,11 @@ export default function OTPVerificationPage() {
           localStorage.removeItem('loginData');
           // Navigate to registration page
           setTimeout(() => {
-            router.push('/register');
+            if (onNavigate) {
+              onNavigate('register');
+            } else {
+              router.push('/register');
+            }
           }, 1500);
         } else {
           // Handle existing user login response
@@ -107,7 +119,11 @@ export default function OTPVerificationPage() {
           
           // Navigate to dashboard after a short delay
           setTimeout(() => {
-            router.push('/dashboard');
+            if (onNavigate) {
+              onNavigate('home');
+            } else {
+              router.push('/dashboard');
+            }
           }, 1500);
         }
       } else {
@@ -208,7 +224,7 @@ export default function OTPVerificationPage() {
       {/* Resend OTP */}
       <div className="text-center mb-4">
         <button 
-          onClick={() => router.push('/login')}
+          onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"
           style={{ fontSize: '16px', color: 'rgb(127, 140, 170)' }}
         >
@@ -222,7 +238,7 @@ export default function OTPVerificationPage() {
           don't have access to your mail?
         </p>
         <button 
-          onClick={() => router.push('/login')}
+          onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"
           style={{ fontSize: '16px', color: 'rgb(127, 140, 170)' }}
         >

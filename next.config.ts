@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.onetopup.in',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
   },
 };

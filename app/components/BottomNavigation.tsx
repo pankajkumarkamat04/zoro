@@ -6,12 +6,16 @@ import { LuGrid2X2 } from 'react-icons/lu';
 import { GiShoppingBag } from 'react-icons/gi';
 import { RiQuestionLine } from 'react-icons/ri';
 
-export default function BottomNavigation() {
+interface BottomNavigationProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function BottomNavigation({ onNavigate }: BottomNavigationProps = {}) {
   const router = useRouter();
   
   return (
     <div 
-      className="fixed p-4"
+      className="fixed p-4 z-40"
       style={{
         backgroundColor: 'rgb(30, 30, 30)',
         bottom: '10px',
@@ -25,23 +29,23 @@ export default function BottomNavigation() {
         {/* Home */}
         <div 
           className="flex items-center justify-center cursor-pointer"
-          onClick={() => router.push('/dashboard')}
+          onClick={() => onNavigate ? onNavigate('home') : router.push('/dashboard')}
         >
           <IoMdHome className="w-6 h-6 text-white" />
-        </div>
-        
-        {/* Orders */}
-        <div 
-          className="flex items-center justify-center cursor-pointer"
-          onClick={() => router.push('/orders')}
-        >
-          <LuGrid2X2 className="w-6 h-6 text-white" />
         </div>
         
         {/* Profile */}
         <div 
           className="flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/profile')}
+        >
+          <LuGrid2X2 className="w-6 h-6 text-white" />
+        </div>
+        
+        {/* Orders */}
+        <div 
+          className="flex items-center justify-center cursor-pointer"
+          onClick={() => router.push('/orders')}
         >
           <GiShoppingBag className="w-6 h-6 text-white" />
         </div>

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAppSelector } from '@/lib/hooks/redux';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -25,22 +26,40 @@ interface LeaderboardData {
   };
 }
 
-export default function LeaderboardPage() {
+interface LeaderboardPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {}) {
   const router = useRouter();
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLeaderboardData();
-  }, []);
+    // Only fetch data if user is authenticated
+    if (isAuthenticated && token) {
+      fetchLeaderboardData();
+    } else if (!isAuthenticated) {
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isAuthenticated, token]);
+
+  // Update loading state when authentication changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const fetchLeaderboardData = async () => {
     try {
-      setIsLoading(true);
-      const authToken = localStorage.getItem('authToken');
-      
-      if (!authToken) {
+      if (!token) {
         setError('Authentication token not found');
         return;
       }
@@ -48,7 +67,7 @@ export default function LeaderboardPage() {
       const response = await fetch('https://api.leafstore.in/api/v1/user/leaderboard', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -73,7 +92,8 @@ export default function LeaderboardPage() {
   // Get remaining players (ranks 4-11) from current month leaderboard
   const rankedPlayers = leaderboardData?.currentMonth?.leaderboard?.slice(3, 11) || [];
 
-  if (isLoading) {
+  // Only show loading screen if user is not authenticated yet
+  if (isLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
         <div className="relative z-10">
@@ -289,7 +309,7 @@ export default function LeaderboardPage() {
                 background: '#7F8CAA',
                 boxShadow: '0px 4px 4px 0px #00000040'
               }}
-              onClick={() => router.push('/profile')}
+              onClick={() => onNavigate ? onNavigate('profile') : router.push('/profile')}
             >
               <div className="flex items-center">
                 <span

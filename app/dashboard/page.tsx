@@ -1,10 +1,5 @@
-import DashboardPage from '../components/DashboardPage';
-import ProtectedRoute from '../components/ProtectedRoute';
+import DesktopRedirect from '../components/DesktopRedirect';
 
 export default function Dashboard() {
-  return (
-    <ProtectedRoute>
-      <DashboardPage />
-    </ProtectedRoute>
-  );
+  return <DesktopRedirect />;
 }

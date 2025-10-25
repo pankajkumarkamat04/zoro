@@ -8,7 +8,11 @@ import { useAppDispatch } from '@/lib/hooks/redux';
 import { registerStart, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import FadedCircle from './FadedCircle';
 
-export default function RegisterPage() {
+interface RegisterPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -96,7 +100,11 @@ export default function RegisterPage() {
         
         // Navigate to dashboard after successful registration
         setTimeout(() => {
-          router.push('/dashboard');
+          if (onNavigate) {
+            onNavigate('home');
+          } else {
+            router.push('/dashboard');
+          }
         }, 1500);
       } else {
         const errorData = await response.json();
@@ -258,7 +266,7 @@ export default function RegisterPage() {
             existing user?
           </span>
           <button 
-            onClick={() => router.push('/login')}
+            onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
             className="text-white hover:opacity-80 transition-colors font-medium"
             style={{ fontSize: '20px', color: '#7F8CAA' }}
           >

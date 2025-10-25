@@ -7,7 +7,11 @@ import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
-export default function AddCoinPage() {
+interface AddCoinPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
   const router = useRouter();
   const [selectedAmount, setSelectedAmount] = useState<string>('');
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -52,7 +56,11 @@ export default function AddCoinPage() {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        router.push('/login');
+        if (onNavigate) {
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
         return;
       }
 

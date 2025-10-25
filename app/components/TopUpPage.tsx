@@ -7,7 +7,11 @@ import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
-export default function TopUpPage() {
+interface TopUpPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const router = useRouter();
   const params = useParams();
   const gameId = params?.gameId as string;
@@ -328,7 +332,11 @@ export default function TopUpPage() {
                   serverId: formData.serverId
                 };
                 localStorage.setItem('selectedPack', JSON.stringify(packDetails));
-                router.push('/checkout');
+                if (onNavigate) {
+                  onNavigate('checkout');
+                } else {
+                  router.push('/checkout');
+                }
               }}
             >
               <div className="relative mb-6">

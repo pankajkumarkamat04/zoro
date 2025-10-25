@@ -7,7 +7,11 @@ import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
-export default function PaymentMethodsPage() {
+interface PaymentMethodsPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPageProps) {
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [packDetails, setPackDetails] = useState<any>(null);
@@ -30,7 +34,11 @@ export default function PaymentMethodsPage() {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        router.push('/login');
+        if (onNavigate) {
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
         return;
       }
 
@@ -146,8 +154,12 @@ export default function PaymentMethodsPage() {
         const responseData = await response.json();
         if (responseData.success) {
           toast.success('Payment completed successfully with Serene Coins!');
-          // Redirect to dashboard or order success page
-          router.push('/dashboard');
+          // Redirect to order success page
+          if (onNavigate) {
+            onNavigate('order-success');
+          } else {
+            router.push('/order-success');
+          }
         } else {
           toast.error(responseData.message || 'Failed to process wallet payment');
         }
@@ -188,7 +200,11 @@ export default function PaymentMethodsPage() {
               router.back();
             } catch (error) {
               // Fallback to dashboard if router.back() fails
-              router.push('/dashboard');
+              if (onNavigate) {
+            onNavigate('home');
+          } else {
+            router.push('/dashboard');
+          }
             }
           }}
         >

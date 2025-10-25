@@ -18,6 +18,16 @@ export default function PublicRoute({
   const pathname = usePathname();
 
   useEffect(() => {
+    // Check if user is on desktop and redirect to desktop page
+    if (typeof window !== 'undefined') {
+      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+      
+      if (isDesktop) {
+        router.push('/desktop');
+        return;
+      }
+    }
+
     // Only redirect if we're not on OTP verification page and user is authenticated
     if (!isLoading && isAuthenticated && pathname !== '/otp-verification') {
       router.push(redirectTo);
