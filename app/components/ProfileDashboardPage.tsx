@@ -34,6 +34,9 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   });
   const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     // Only fetch data if user is authenticated
@@ -109,6 +112,71 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedImage) {
+      toast.error('Please select an image first');
+      return;
+    }
+
+    setIsUploadingPicture(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        if (onNavigate) {
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
+        return;
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+
+      const response = await fetch('https://api.leafstore.in/api/v1/user/profile-picture', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        toast.success(responseData.message || 'Profile picture updated successfully!');
+        
+        // Reset image selection
+        setSelectedImage(null);
+        setImagePreview(null);
+        
+        // Refresh user data to show new picture
+        fetchUserData();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to upload profile picture. Please try again.');
+      }
+    } catch (error) {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsUploadingPicture(false);
+    }
   };
 
   const handleUpdate = async () => {
@@ -246,25 +314,62 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           <div className="flex items-center mb-6">
             <div className="relative mr-4">
               <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center border-2"
+                className="w-12 h-12 rounded-full flex items-center justify-center border-2 overflow-hidden"
                 style={{ 
                   backgroundColor: '#232426',
                   borderColor: 'white',
                   boxShadow: '0px 2px 7px 0px white'
                 }}
               >
-                <span 
-                  className="text-white font-bold"
-                  style={{ fontSize: '20px' }}
-                >
-                  U
-                </span>
-                <div 
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'white' }}
-                >
+                {imagePreview ? (
+                  <img 
+                    src={imagePreview} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : userData?.profilePicture ? (
+                  <>
+                    <img 
+                      src={userData.profilePicture} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Show initial on error
+                        const container = e.currentTarget.parentElement;
+                        if (container) {
+                          const initialSpan = container.querySelector('.profile-initial');
+                          if (initialSpan) {
+                            (initialSpan as HTMLElement).style.display = 'block';
+                          }
+                        }
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <span 
+                      className="text-white font-bold profile-initial"
+                      style={{ fontSize: '20px', display: 'none' }}
+                    >
+                      {userData?.name?.[0]?.toUpperCase() || 'U'}
+                    </span>
+                  </>
+                ) : (
+                  <span 
+                    className="text-white font-bold"
+                    style={{ fontSize: '20px' }}
+                  >
+                    {userData?.name?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                )}
+                <label className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'white' }}>
                   <FiEdit2 className="w-2.5 h-2.5" style={{ color: '#232426' }} />
-                </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
             <div>
@@ -277,6 +382,37 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
               <p className="text-gray-400 text-sm">+91 {userData?.phone || '123456789'}</p>
             </div>
           </div>
+
+          {/* Show upload button when image is selected */}
+          {selectedImage && (
+            <div className="mb-4 flex flex-col items-center space-y-2">
+              <img 
+                src={imagePreview!} 
+                alt="Preview" 
+                className="w-24 h-24 rounded-full object-cover border-2 border-white"
+              />
+              <button
+                onClick={handleImageUpload}
+                disabled={isUploadingPicture}
+                className="text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: '#7F8CAA',
+                  fontSize: '14px'
+                }}
+              >
+                {isUploadingPicture ? 'UPLOADING...' : 'Upload Picture'}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                }}
+                className="text-gray-400 text-sm hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
           {/* Input Fields */}
           <div className="space-y-4">

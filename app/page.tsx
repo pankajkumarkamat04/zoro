@@ -1,5 +1,5 @@
-import DesktopRedirect from './components/DesktopRedirect';
+import DesktopLandingPage from './components/DesktopLandingPage';
 
 export default function Home() {
-  return <DesktopRedirect />;
+  return <DesktopLandingPage />;
 }
