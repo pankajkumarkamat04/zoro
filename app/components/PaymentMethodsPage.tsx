@@ -86,7 +86,9 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         server: packDetails.serverId,
         amount: packDetails.packAmount,
         quantity: 1,
-        redirectUrl: 'https://leafstore.in'
+        redirectUrl: typeof window !== 'undefined' 
+          ? `${window.location.origin}/payment-status`
+          : 'https://leafstore.in/payment-status'
       };
 
       const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
@@ -154,11 +156,11 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         const responseData = await response.json();
         if (responseData.success) {
           toast.success('Payment completed successfully with Serene Coins!');
-          // Redirect to order success page
+          // Redirect to dashboard since wallet payment doesn't have transaction IDs
           if (onNavigate) {
-            onNavigate('order-success');
+            onNavigate('home');
           } else {
-            router.push('/order-success');
+            router.push('/dashboard');
           }
         } else {
           toast.error(responseData.message || 'Failed to process wallet payment');

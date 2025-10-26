@@ -462,7 +462,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
       <div className="h-15"></div>
 
       {/* Side Menu */}
-      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} onNavigate={onNavigate} />
     </div>
 
   );

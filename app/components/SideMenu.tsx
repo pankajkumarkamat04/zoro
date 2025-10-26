@@ -8,9 +8,10 @@ import { logout } from '@/lib/store/authSlice';
 interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (screen: string) => void;
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
+const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, onNavigate }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
@@ -18,7 +19,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem('authToken');
-    router.push('/login');
+    onClose();
+    if (onNavigate) {
+      onNavigate('login');
+    } else {
+      router.push('/login');
+    }
   };
 
   const menuItems = [
@@ -84,9 +90,26 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
     }
   ];
 
+  const getScreenName = (path: string) => {
+    const screenMap: { [key: string]: string } = {
+      '/dashboard': 'home',
+      '/profile': 'profile',
+      '/orders': 'orders',
+      '/leaderboard': 'leaderboard',
+      '/addcoin': 'addcoin',
+      '/contact': 'contact',
+    };
+    return screenMap[path] || path;
+  };
+
   const handleMenuItemClick = (path: string) => {
-    router.push(path);
+    const screenName = getScreenName(path);
     onClose();
+    if (onNavigate) {
+      onNavigate(screenName);
+    } else {
+      router.push(path);
+    }
   };
 
   return (

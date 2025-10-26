@@ -13,12 +13,11 @@ import ProfileDashboardPage from './ProfileDashboardPage';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import TopUpPage from './TopUpPage';
-import OrderSuccessPage from './OrderSuccessPage';
-import OrderFailedPage from './OrderFailedPage';
 import OTPVerificationPage from './OTPVerificationPage';
 import AddCoinPage from './AddCoinPage';
 import PaymentMethodsPage from './PaymentMethodsPage';
 import ContactUsPage from './ContactUsPage';
+import PaymentStatusPage from './PaymentStatusPage';
 
 const DesktopLandingPage: React.FC = () => {
   const router = useRouter();
@@ -58,12 +57,10 @@ const DesktopLandingPage: React.FC = () => {
         return <AddCoinPage onNavigate={navigateInPhone} />;
       case 'checkout':
         return <PaymentMethodsPage onNavigate={navigateInPhone} />;
-      case 'order-success':
-        return <OrderSuccessPage onNavigate={navigateInPhone} />;
-      case 'order-failed':
-        return <OrderFailedPage onNavigate={navigateInPhone} />;
       case 'contact':
         return <ContactUsPage onNavigate={navigateInPhone} />;
+      case 'payment-status':
+        return <PaymentStatusPage onNavigate={navigateInPhone} />;
       default:
         // Default to login if not authenticated, dashboard if authenticated
         return isAuthenticated ? <DashboardPage onNavigate={navigateInPhone} /> : <LoginPage onNavigate={navigateInPhone} />;
