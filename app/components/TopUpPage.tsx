@@ -212,18 +212,19 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
               </div>
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">{gameData.name}</h3>
-              <p className="text-gray-300 text-sm">{gameData.publisher}</p>
+              <h3 className="text-white font-bold text-base sm:text-lg">{gameData.name}</h3>
+              <p className="text-gray-300 text-xs sm:text-sm">{gameData.publisher}</p>
             </div>
           </div>
 
           {/* Input Fields */}
           <div className="space-y-4">
             <div>
-              <label className="text-white text-sm mb-2 block">Enter Your UID</label>
+              <label htmlFor="topup-uid" className="text-white text-sm mb-2 block">Enter Your UID</label>
               <input
                 type="text"
                 name="playerId"
+                id="topup-uid"
                 value={formData.playerId}
                 onChange={handleInputChange}
                 placeholder="Enter your UID"
@@ -232,10 +233,11 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
               />
             </div>
             <div>
-              <label className="text-white text-sm mb-2 block">Enter Your Server ID</label>
+              <label htmlFor="topup-server" className="text-white text-sm mb-2 block">Enter Your Server ID</label>
               <input
                 type="text"
                 name="serverId"
+                id="topup-server"
                 value={formData.serverId}
                 onChange={handleInputChange}
                 placeholder="Enter your Server ID"
@@ -245,6 +247,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
             </div>
             <div className="flex justify-center">
               <button
+                type="button"
                 onClick={handleValidate}
                 disabled={isValidating}
                 className="py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -267,19 +270,19 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
       {/* Select Diamond Pack Section */}
       <div className="px-4 mb-6">
-        <h2 className="text-white font-bold text-lg mb-4">Select Diamond Pack</h2>
+        <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
         {/* Filter Buttons */}
-        <div className="flex space-x-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           {filterButtons.map((button, index) => (
             <button
               key={index}
-              className="rounded-lg text-sm font-medium flex items-center text-white"
+              type="button"
+              className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white"
               style={{
                 background: 'rgb(35, 36, 38)',
-                fontSize: '10px',
                 border: '1px solid rgb(127, 140, 170)',
-                padding: '8px 16px',
+                padding: '8px 12px',
                 borderRadius: '25px'
               }}
             >
@@ -296,7 +299,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         </div>
 
          {/* Diamond Pack Cards */}
-         <div className="grid grid-cols-3 gap-3">
+         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {diamondPacks.map((pack, index) => (
             <div
               key={pack._id}
@@ -347,7 +350,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   height={80}
                   className="w-full h-20 object-cover rounded-lg"
                   style={{
-                    width: '80px',
+                    width: '70px',
                     margin: 'auto',
                     color: 'transparent'
                   }}

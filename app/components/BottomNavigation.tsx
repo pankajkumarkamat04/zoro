@@ -14,14 +14,13 @@ export default function BottomNavigation({ onNavigate }: BottomNavigationProps =
   const router = useRouter();
   
   return (
-    <div 
-      className="fixed p-4 z-40"
+    <nav 
+      aria-label="Bottom Navigation"
+      className="fixed p-3 sm:p-4 z-40 left-4 right-4 sm:left-8 sm:right-8"
       style={{
         backgroundColor: 'rgb(30, 30, 30)',
         bottom: '10px',
         borderRadius: '50px',
-        left: '30px',
-        right: '30px',
         boxShadow: 'rgb(127, 140, 178) 0px 5px 6px'
       }}
     >
@@ -58,6 +57,6 @@ export default function BottomNavigation({ onNavigate }: BottomNavigationProps =
           <RiQuestionLine className="w-6 h-6 text-white" />
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

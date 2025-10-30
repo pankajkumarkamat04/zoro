@@ -128,7 +128,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
 
       {/* Page Title */}
       <div className="px-4 mb-6">
-        <h1 className="text-white font-bold text-2xl">Leaderboards</h1>
+        <h1 className="text-white font-bold text-xl sm:text-2xl">Leaderboards</h1>
         {leaderboardData?.currentMonth?.month && (
           <p className="text-gray-400 text-sm mt-2">{leaderboardData.currentMonth.month}</p>
         )}
@@ -136,13 +136,10 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
 
       {/* Top 3 Players */}
       <div className="px-4 mb-8">
-        <div className="flex justify-center items-end space-x-4">
+        <div className="flex justify-center items-end space-x-3 sm:space-x-4">
           {/* Rank #2 */}
           <div className="flex flex-col items-center">
-            <div
-              className="text-white font-medium mb-2"
-              style={{ fontSize: '20px' }}
-            >
+              <div className="text-white font-medium mb-2 text-base sm:text-lg">
               #2
             </div>
             <div className="relative mb-4">
@@ -157,13 +154,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div
-                className="text-white mb-2"
-                style={{
-                  fontSize: '16px',
-                  textAlign: 'center'
-                }}
-              >
+              <div className="text-white mb-2 text-sm sm:text-base text-center">
                 {topThreePlayers[0]?.name || 'Loading...'}
               </div>
               <div
@@ -192,10 +183,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
 
           {/* Rank #1 */}
           <div className="flex flex-col items-center">
-            <div
-              className="text-white font-medium mb-2"
-              style={{ fontSize: '20px', color: '#7F8CAA' }}
-            >
+              <div className="text-white font-medium mb-2 text-base sm:text-lg" style={{ color: '#7F8CAA' }}>
               #1
             </div>
             <div className="relative mb-4">
@@ -210,13 +198,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div
-                className="text-white mb-2"
-                style={{
-                  fontSize: '16px',
-                  textAlign: 'center'
-                }}
-              >
+              <div className="text-white mb-2 text-sm sm:text-base text-center">
                 {topThreePlayers[1]?.name || 'Loading...'}
               </div>
               <div
@@ -245,10 +227,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
 
           {/* Rank #3 */}
           <div className="flex flex-col items-center">
-            <div
-              className="text-white font-medium mb-2"
-              style={{ fontSize: '20px' }}
-            >
+              <div className="text-white font-medium mb-2 text-base sm:text-lg">
               #3
             </div>
             <div className="relative mb-4">
@@ -263,13 +242,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div
-                className="text-white mb-2"
-                style={{
-                  fontSize: '16px',
-                  textAlign: 'center'
-                }}
-              >
+              <div className="text-white mb-2 text-sm sm:text-base text-center">
                 {topThreePlayers[2]?.name || 'Loading...'}
               </div>
               <div

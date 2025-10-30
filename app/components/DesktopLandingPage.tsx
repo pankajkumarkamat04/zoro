@@ -98,15 +98,15 @@ const DesktopLandingPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 h-screen">
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start h-screen">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start h-screen">
           {/* Left Side - Marketing Content */}
-          <div className="space-y-8 py-8">
+          <div className="space-y-6 lg:space-y-8 py-8">
              {/* Headline */}
              <div>
-               <h2 className="text-white text-4xl lg:text-5xl font-bold leading-tight mb-4">
+               <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">
                  Secure & affordable Game Top-ups via UPI Payment
                </h2>
-               <p className="text-gray-300 text-lg mb-4">
+               <p className="text-gray-300 text-base md:text-lg mb-4">
                  Your one-stop gateway for gaming greatness. Instant, affordable, and reliable top-ups for your favorite games.
                </p>
                <div className="bg-orange-500 bg-opacity-20 border border-orange-500 rounded-lg p-4">
@@ -167,7 +167,7 @@ const DesktopLandingPage: React.FC = () => {
             <div className="relative h-full">
               {/* Phone Frame */}
               <div 
-                className="relative w-96 h-[700px] rounded-[3rem] p-2"
+                className="relative w-80 md:w-96 h-[640px] md:h-[700px] rounded-[3rem] p-2"
                 style={{ 
                   backgroundColor: '#1a1a1a',
                   boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'

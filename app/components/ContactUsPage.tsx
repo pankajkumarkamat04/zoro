@@ -51,12 +51,7 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
       {/* Page Title */}
       <div>
         <h1 
-          className="text-white font-bold"
-          style={{
-            fontSize: '32px',
-            fontWeight: 700,
-            textAlign: 'center'
-          }}
+          className="text-white font-bold text-2xl sm:text-3xl text-center"
         >
           Contact US
         </h1>
@@ -82,10 +77,8 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
 
           {/* Sub-heading */}
           <h2 
-            className="text-white font-medium mb-8"
+            className="text-white font-medium mb-8 text-base sm:text-lg"
             style={{
-              fontSize: '20px',
-              fontWeight: 700,
               marginTop: '-50px'
             }}
           >
@@ -106,10 +99,11 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
             <div>
-              <label className="text-white text-sm mb-2 block">Enter your email</label>
+              <label htmlFor="contact-email" className="text-white text-sm mb-2 block">Enter your email</label>
               <input
                 type="email"
                 name="email"
+                id="contact-email"
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Enter your email"
@@ -121,10 +115,11 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
 
             {/* Phone Field */}
             <div>
-              <label className="text-white text-sm mb-2 block">Enter your phone number</label>
+              <label htmlFor="contact-phone" className="text-white text-sm mb-2 block">Enter your phone number</label>
               <input
                 type="tel"
                 name="phone"
+                id="contact-phone"
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="Enter your phone number"
@@ -136,10 +131,11 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
 
             {/* Name Field */}
             <div>
-              <label className="text-white text-sm mb-2 block">Enter your name</label>
+              <label htmlFor="contact-name" className="text-white text-sm mb-2 block">Enter your name</label>
               <input
                 type="text"
                 name="name"
+                id="contact-name"
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Enter your name"
@@ -151,9 +147,10 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
 
             {/* Issue Field */}
             <div>
-              <label className="text-white text-sm mb-2 block">Explain your issue</label>
+              <label htmlFor="contact-issue" className="text-white text-sm mb-2 block">Explain your issue</label>
               <textarea
                 name="issue"
+                id="contact-issue"
                 value={formData.issue}
                 onChange={handleInputChange}
                 placeholder="Explain your issue"
@@ -168,12 +165,10 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
             <div className="flex justify-center pt-4">
               <button
                 type="submit"
-                className="text-white font-bold"
+                className="text-white font-bold w-full max-w-sm py-3 sm:py-4 text-base sm:text-lg"
                 style={{
                   backgroundColor: '#232426',
                   boxShadow: '0px 4px 4px 0px #00000040',
-                  padding: '10px 70px',
-                  fontSize: '20px',
                   border: '1px solid #7F8CAA',
                   borderRadius: '40px'
                 }}

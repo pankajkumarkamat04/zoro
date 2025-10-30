@@ -140,10 +140,10 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-10 relative overflow-hidden" style={{ backgroundColor: 'rgb(35, 36, 38)' }}>
+    <div className="min-h-screen flex flex-col items-center pt-8 sm:pt-10 px-4 relative overflow-hidden" style={{ backgroundColor: 'rgb(35, 36, 38)' }}>
       {/* Logo */}
       <div className="">
-        <div className="w-48 h-48 flex items-center justify-center">
+        <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 flex items-center justify-center">
           <Image
             src="/logo.png"
             alt="Creds Zone Logo"
@@ -155,27 +155,27 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
       </div>
 
       {/* Title */}
-      <div className="text-center mb-8">
-        <h1 className="text-white font-bold mb-4" style={{ fontSize: '40px' }}>
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl">
           ENTER OTP
         </h1>
       </div>
 
       {/* Instructional Text */}
-      <div className="text-center mb-8 px-4">
-        <p className="text-white mb-2" style={{ fontSize: '20px' }}>
+      <div className="text-center mb-6 sm:mb-8 px-2 sm:px-4">
+        <p className="text-white mb-2 text-sm sm:text-base">
           A one-time password has been sent to your phone number at
         </p>
         <div className="flex items-center justify-center">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'rgb(127, 140, 170)' }}>
             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
           </svg>
-          <span style={{ fontSize: '20px', color: 'rgb(127, 140, 170)' }}>{loginData?.email || '8709507961'}</span>
+          <span className="text-sm sm:text-base" style={{ color: 'rgb(127, 140, 170)' }}>{loginData?.email || '8709507961'}</span>
         </div>
       </div>
 
       {/* OTP Input Fields */}
-      <div className="flex gap-1 mb-8">
+      <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8">
         {otp.map((digit, index) => (
           <input
             key={index}
@@ -187,10 +187,13 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
             value={digit}
             onChange={(e) => handleOtpChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
-            className="text-center text-white font-bold text-xl focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label={`OTP digit ${index + 1}`}
+            className="text-center text-white font-bold text-lg sm:text-xl focus:outline-none focus:ring-2 focus:ring-white"
             style={{
-              width: '60px',
-              height: '60px',
+              width: '44px',
+              height: '48px',
+              // scale up on larger screens
+              ...(typeof window === 'undefined' ? {} : {}),
               borderRadius: '25px',
               backgroundColor: 'rgb(195, 191, 191)',
               border: 'none',
@@ -201,16 +204,15 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
       </div>
 
       {/* Proceed Button */}
-      <div className="mb-8">
+      <div className="w-full max-w-sm px-2 sm:px-0 mb-6 sm:mb-8">
         <button 
+          type="button"
           onClick={handleProceed}
           disabled={isLoading}
-          className="text-white font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-busy={isLoading}
+          className="w-full text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ 
-            width: '384px',
-            height: '60px',
-            top: '637px',
-            left: '31px',
+            height: '52px',
             backgroundColor: 'rgb(127, 140, 170)', 
             borderRadius: '25px',
             border: '1px solid transparent',
@@ -224,9 +226,10 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
       {/* Resend OTP */}
       <div className="text-center mb-4">
         <button 
+          type="button"
           onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"
-          style={{ fontSize: '16px', color: 'rgb(127, 140, 170)' }}
+          style={{ color: 'rgb(127, 140, 170)' }}
         >
           Didn't receive OTP? Resend
         </button>
@@ -234,13 +237,14 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
 
       {/* Alternative Login Option */}
       <div className="text-center mb-8">
-        <p className="text-white mb-2" style={{ fontSize: '16px' }}>
+        <p className="text-white mb-2 text-sm sm:text-base">
           don't have access to your mail?
         </p>
         <button 
+          type="button"
           onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"
-          style={{ fontSize: '16px', color: 'rgb(127, 140, 170)' }}
+          style={{ color: 'rgb(127, 140, 170)' }}
         >
           login using phone number
         </button>

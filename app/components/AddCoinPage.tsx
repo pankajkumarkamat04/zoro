@@ -144,11 +144,11 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
 
       {/* Coin Packs Section */}
       <div className="px-4 mb-6">
-              <h2 className="text-white font-bold mb-4" style={{ fontSize: '32px' }}>
+              <h2 className="text-white font-bold mb-4 text-xl sm:text-2xl">
                 Coin Packs
               </h2>
         
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {coinPacks.map((pack, index) => (
             <div 
               key={index}
@@ -207,12 +207,11 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
             <button 
               onClick={handlePayment}
               disabled={isProcessing}
-              className="rounded-3xl text-white font-bold text-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full max-w-sm rounded-3xl text-white font-bold text-base sm:text-lg py-3 sm:py-4 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ 
                 background: '#7F8CAA',
                 boxShadow: '0px 4px 4px 0px #00000040',
-                border: '2px solid white',
-                padding: '10px 130px'
+                border: '2px solid white'
               }}
             >
               {isProcessing ? 'PROCESSING...' : 'PAY ONLINE'}

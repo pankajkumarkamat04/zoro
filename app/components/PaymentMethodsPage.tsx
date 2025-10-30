@@ -155,7 +155,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.success) {
-          toast.success('Payment completed successfully with Serene Coins!');
+          toast.success('Payment completed successfully with CRED Coins!');
           // Redirect to dashboard since wallet payment doesn't have transaction IDs
           if (onNavigate) {
             onNavigate('home');
@@ -187,6 +187,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       {/* Back Button */}
       <div className="px-4 mb-4">
         <button
+          type="button"
           className="flex items-center cursor-pointer"
           style={{
             color: '#7F8CAA',
@@ -219,7 +220,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
 
       {/* Page Title */}
       <div className="px-4 mb-6">
-        <h1 className="text-white font-bold text-2xl">Payment Methods</h1>
+        <h1 className="text-white font-bold text-xl sm:text-2xl">Payment Methods</h1>
       </div>
 
       {/* Payment Summary */}
@@ -274,7 +275,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       {/* Payment Options */}
       <div className="px-4 mb-8">
         <div className="space-y-4">
-          {/* Serene Coins Option */}
+          {/* CRED Coins Option */}
           <div
             className={`flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all ${
               selectedPaymentMethod === 'serene-coins' ? 'ring-4 ring-white' : ''
@@ -291,7 +292,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
                 toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
                 return;
               }
-              setSelectedPaymentMethod('serene-coins');
+              setSelectedPaymentMethod('cred-coins');
             }}
           >
              <div className="flex items-center">
@@ -306,7 +307,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
                  />
                </div>
               <div>
-                <p className="text-white text-sm" style={{ fontSize: '16px', fontWeight: 600 }}>Serene Coins</p>
+                <p className="text-white text-sm" style={{ fontSize: '16px', fontWeight: 600 }}>CRED Coins</p>
                 <p className="text-white font-bold text-sm" style={{ fontSize: '20px', fontWeight: 700 }}>Available Balance</p>
               </div>
             </div>
@@ -354,9 +355,10 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       </div>
 
       {/* Pay Securely Button */}
-      <div className="px-4 mt-10 mb-8 flex justify-center">
+      <div className="px-4 mt-8 sm:mt-10 mb-8 flex justify-center">
         <button
-          className="py-4 rounded-4xl text-white font-bold text-lg flex items-center justify-center cursor-pointer"
+          type="button"
+          className="w-full max-w-sm py-3 sm:py-4 rounded-4xl text-white font-bold text-base sm:text-lg flex items-center justify-center cursor-pointer"
           style={{ 
             backgroundColor: 'rgb(127, 140, 170)',
             border: '1px solid',
@@ -368,6 +370,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
             boxShadow: '0px 4px 4px 0px #00000040',
             opacity: isProcessingPayment ? 0.7 : 1
           }}
+          aria-busy={isProcessingPayment}
           disabled={isProcessingPayment}
           onClick={async () => {
             if (!selectedPaymentMethod) {
@@ -375,7 +378,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
               return;
             }
             
-            if (selectedPaymentMethod === 'serene-coins') {
+            if (selectedPaymentMethod === 'cred-coins') {
               // Check if user has enough coins
               if (!packDetails) {
                 toast.error('No pack selected');

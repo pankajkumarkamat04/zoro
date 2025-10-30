@@ -279,6 +279,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       {/* Go Back Link */}
       <div className="px-4 mb-4">
         <button 
+          type="button"
           className="cursor-pointer"
           style={{
             fontSize: '16px',
@@ -294,7 +295,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       {/* Welcome Section */}
       <div className="px-4 mb-6">
         <h1 
-          className="text-white font-bold text-2xl"
+          className="text-white font-bold text-xl sm:text-2xl"
           style={{ fontSize: '24px' }}
         >
           Welcome <span style={{ color: '#7F8CAA' }}>{userData?.name || 'User'}</span>
@@ -314,7 +315,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           <div className="flex items-center mb-6">
             <div className="relative mr-4">
               <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center border-2 overflow-hidden"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 overflow-hidden"
                 style={{ 
                   backgroundColor: '#232426',
                   borderColor: 'white',
@@ -417,9 +418,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           {/* Input Fields */}
           <div className="space-y-4">
             <div>
-              <label className="text-white text-sm mb-2 block">Full name</label>
+              <label htmlFor="profile-fullname" className="text-white text-sm mb-2 block">Full name</label>
               <input
                 type="text"
+                id="profile-fullname"
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
@@ -429,9 +431,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
 
             <div>
-              <label className="text-white text-sm mb-2 block">Email</label>
+              <label htmlFor="profile-email" className="text-white text-sm mb-2 block">Email</label>
               <input
                 type="email"
+                id="profile-email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
@@ -441,9 +444,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
 
             <div>
-              <label className="text-white text-sm mb-2 block">Current Password</label>
+              <label htmlFor="profile-current-password" className="text-white text-sm mb-2 block">Current Password</label>
               <input
                 type="password"
+                id="profile-current-password"
                 name="currentPassword"
                 value={formData.currentPassword}
                 onChange={handleInputChange}
@@ -454,9 +458,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
 
             <div>
-              <label className="text-white text-sm mb-2 block">New Password</label>
+              <label htmlFor="profile-new-password" className="text-white text-sm mb-2 block">New Password</label>
               <input
                 type="password"
+                id="profile-new-password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
@@ -470,6 +475,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           {/* Update Button */}
           <div className="flex justify-center mt-6">
             <button
+              type="button"
               onClick={handleUpdate}
               disabled={isUpdating}
               className="text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -497,7 +503,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             boxShadow: 'rgba(0, 0, 0, 0.25) 0px 4px 4px 0px'
           }}
         >
-          {/* Serene Coins Balance Section */}
+          {/* CRED Coins Balance Section */}
           <div 
             className="flex items-center justify-between p-4 rounded-2xl mb-6"
             style={{ 
@@ -510,7 +516,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
               <div className="mr-4">
                 <Image
                   src="/coin.png"
-                  alt="Serene Coins"
+                  alt="CRED Coins"
                   width={48}
                   height={48}
                   className="rounded-full"
@@ -518,7 +524,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 />
               </div>
               <div>
-                <p className="text-white text-sm">Serene Coins</p>
+                <p className="text-white text-sm">CRED Coins</p>
                 <p 
                   className="text-white font-bold"
                   style={{ fontSize: '16px' }}
@@ -552,12 +558,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 style={{ 
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
-                  width: '100px',
-                  height: '100px'
+                  width: '90px',
+                  height: '90px'
                 }}
               >
                 <svg 
-                  className="w-12 h-12 text-white" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
                   fill="currentColor" 
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}
@@ -591,12 +597,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 style={{ 
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
-                  width: '100px',
-                  height: '100px'
+                  width: '90px',
+                  height: '90px'
                 }}
               >
                 <svg 
-                  className="w-12 h-12 text-white" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
                   fill="currentColor" 
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}
@@ -630,12 +636,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 style={{ 
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
-                  width: '100px',
-                  height: '100px'
+                  width: '90px',
+                  height: '90px'
                 }}
               >
                 <svg 
-                  className="w-12 h-12 text-white" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
                   fill="currentColor" 
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}

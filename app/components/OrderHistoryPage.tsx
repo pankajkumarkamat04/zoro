@@ -211,7 +211,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Page Title */}
       <div className="px-4 mb-6">
-        <h1 className="text-white font-bold text-2xl">Order History</h1>
+        <h1 className="text-white font-bold text-xl sm:text-2xl">Order History</h1>
         {orderData?.pagination && (
           <p className="text-gray-400 text-sm mt-2">
             Showing {orderData?.orders?.length || 0} of {orderData?.pagination?.totalOrders || 0} orders
@@ -221,12 +221,13 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Search and Filter Section */}
       <div className="px-4 mb-6">
-        <div className="space-y-4">
+        <div className="space-y-4" role="search">
           {/* Search by Order ID */}
           <div className="relative">
             <input 
               type="text" 
               placeholder="search by order id"
+              aria-label="search by order id"
               className="w-full px-4 py-3 rounded-lg text-black placeholder-gray-500"
               style={{ backgroundColor: '#D9D9D9' }}
               value={searchOrderId}
@@ -240,7 +241,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
           </div>
 
           {/* Date Input, Status Filter and Search Button */}
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
             <div className="relative flex-1">
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
@@ -250,6 +251,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
               <input 
                 type="date" 
                 placeholder="dd-mm-yyyy"
+                aria-label="filter by date"
                 className="w-full pl-10 pr-4 py-3 rounded-lg text-black placeholder-gray-500"
                 style={{ backgroundColor: '#D9D9D9' }}
                 value={searchDate}
@@ -259,6 +261,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
             <div className="relative flex-1">
               <select 
                 className="w-full px-4 py-3 rounded-lg text-black"
+                aria-label="filter by status"
                 style={{ backgroundColor: '#D9D9D9' }}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -271,6 +274,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
               </select>
             </div>
             <button 
+              type="button"
               className="px-6 py-3 rounded-lg text-white font-medium"
               style={{ backgroundColor: '#363B48' }}
               onClick={handleSearch}
@@ -303,9 +307,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                     boxShadow: '0px 4px 4px 0px #00000040'
                   }}
                 >
-                  <div className="flex">
+                  <div className="flex flex-col sm:flex-row">
                     {/* Left Column - Labels */}
-                    <div className="w-1/3 space-y-3">
+                    <div className="sm:w-1/3 space-y-3 mb-4 sm:mb-0">
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
@@ -317,7 +321,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                     </div>
 
                     {/* Vertical Divider */}
-                    <div className="w-px bg-white mx-4"></div>
+                    <div className="hidden sm:block w-px bg-white mx-4"></div>
 
                     {/* Right Column - Values */}
                     <div className="flex-1 space-y-3">

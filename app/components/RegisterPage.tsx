@@ -120,10 +120,10 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-8 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen flex flex-col items-center pt-10 sm:pt-12 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
       {/* Logo */}
       <div className="mb-8 relative z-10">
-        <div className="w-36 h-36 flex items-center justify-center">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 flex items-center justify-center">
           <Image
             src="/logo.png"
             alt="Creds Zone Logo"
@@ -137,7 +137,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
       {/* Registration Form */}
       <div className="w-full max-w-sm relative">
         {/* Form Container */}
-        <div className="rounded-2xl p-6 shadow-lg relative border-2 border-white" style={{ backgroundColor: '#7F8CAA' }}>
+        <div className="rounded-2xl p-6 pt-12 shadow-lg relative border-2 border-white" style={{ backgroundColor: '#7F8CAA' }}>
            {/* User Icon */}
            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
              <div className="rounded-full flex items-center justify-center" style={{ 
@@ -152,8 +152,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
            </div>
 
           {/* Title */}
-          <div className="mt-8 mb-6">
-            <h1 className="text-center font-bold mb-4" style={{ fontSize: '40px', color: 'white' }}>
+          <div className="mt-6 sm:mt-8 mb-6">
+            <h1 className="text-center font-bold mb-4 text-2xl sm:text-3xl" style={{ color: 'white' }}>
               Register
             </h1>
             <div className="w-full h-px" style={{ backgroundColor: 'white' }}></div>
@@ -161,19 +161,20 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
 
           {/* Name Input */}
           <div className="mb-4">
-            <label className="block mb-2 font-medium" style={{ color: 'white', fontSize: '20px' }}>
+            <label htmlFor="reg-name" className="block mb-2 font-medium" style={{ color: 'white', fontSize: '18px' }}>
               Name
             </label>
             <input
               type="text"
+              id="reg-name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="enter your name"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white text-gray-800"
               style={{ 
                 backgroundColor: '#C3BFBF', 
                 color: '#232426',
-                fontSize: '20px'
+                fontSize: '16px'
               }}
             />
           </div>
@@ -184,20 +185,21 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'white' }}>
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
               </svg>
-              <label className="font-medium" style={{ color: 'white', fontSize: '20px' }}>
+              <label htmlFor="reg-phone" className="font-medium" style={{ color: 'white', fontSize: '18px' }}>
                 Phone Number
               </label>
             </div>
             <input
               type="tel"
+              id="reg-phone"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
               placeholder="enter your number"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white text-gray-800"
               style={{ 
                 backgroundColor: '#C3BFBF', 
                 color: '#232426',
-                fontSize: '20px'
+                fontSize: '16px'
               }}
             />
           </div>
@@ -209,39 +211,41 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
-              <label className="font-medium" style={{ color: 'white', fontSize: '20px' }}>
+              <label htmlFor="reg-email" className="font-medium" style={{ color: 'white', fontSize: '18px' }}>
                 Email Address
               </label>
             </div>
             <input
               type="email"
+              id="reg-email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               placeholder="enter your email"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white text-gray-800"
               style={{ 
                 backgroundColor: '#C3BFBF', 
                 color: '#232426',
-                fontSize: '20px'
+                fontSize: '16px'
               }}
             />
           </div>
 
           {/* Password Input */}
           <div className="mb-6">
-            <label className="block mb-2 font-medium" style={{ color: 'white', fontSize: '20px' }}>
+            <label htmlFor="reg-password" className="block mb-2 font-medium" style={{ color: 'white', fontSize: '18px' }}>
               Create Password
             </label>
             <input
               type="password"
+              id="reg-password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               placeholder="create your password"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent placeholder-white text-gray-800"
               style={{ 
                 backgroundColor: '#C3BFBF', 
                 color: '#232426',
-                fontSize: '20px'
+                fontSize: '16px'
               }}
             />
           </div>
@@ -249,11 +253,13 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
         </div>
 
         {/* Register Button */}
-        <div className="mt-6">
+        <div className="mt-6 px-2 sm:px-0">
           <button 
+            type="button"
             onClick={handleRegister}
             disabled={isLoading}
-            className="w-full py-4 text-white font-bold text-lg transition-colors border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-busy={isLoading}
+            className="w-full py-3 sm:py-4 text-white font-bold text-base sm:text-lg transition-colors border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#7F8CAA', borderRadius: '25px' }}
           >
             {isLoading ? 'CREATING ACCOUNT...' : 'SIGN UP NOW'}
@@ -262,13 +268,14 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
 
         {/* Login Link */}
         <div className="mt-3 text-center">
-          <span className="text-white mr-2" style={{ fontSize: '20px' }}>
+          <span className="text-white mr-2 text-sm sm:text-base">
             existing user?
           </span>
           <button 
+            type="button"
             onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
             className="text-white hover:opacity-80 transition-colors font-medium"
-            style={{ fontSize: '20px', color: '#7F8CAA' }}
+            style={{ color: '#7F8CAA' }}
           >
             Login Now
           </button>

@@ -68,10 +68,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-20 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen flex flex-col items-center pt-16 sm:pt-20 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
       {/* Logo */}
       <div className="">
-        <div className="w-48 h-48 flex items-center justify-center">
+        <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
           <Image
             src="/logo.png"
             alt="Creds Zone Logo"
@@ -83,22 +83,22 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       </div>
 
       {/* Title */}
-      <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-white mb-2">
+      <div className="text-center mb-10 sm:mb-12">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           <span className="text-white">Creds</span>
           <span className="ml-2" style={{ color: '#7F8CAA' }}>Zone</span>
         </h1>
-        <p className="text-white text-sm">your best top-up destination</p>
+        <p className="text-white text-xs sm:text-sm">your best top-up destination</p>
       </div>
 
       {/* Login Form */}
       <div className="w-full max-w-sm relative">
         {/* Form Container */}
-        <div className="rounded-2xl p-6 shadow-lg relative border-2 border-white" style={{ backgroundColor: '#7F8CAA' }}>
+        <div className="rounded-2xl p-6 pt-12 shadow-lg relative border-2 border-white" style={{ backgroundColor: '#7F8CAA' }}>
           {/* User Icon */}
           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
               </svg>
             </div>
@@ -119,11 +119,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               )}
               <span className="text-white font-medium">{isPhoneLogin ? 'Phone' : 'Email'}</span>
             </div>
+            <label htmlFor="login-field" className="sr-only">{isPhoneLogin ? 'Phone number' : 'Email address'}</label>
             <input
               type={isPhoneLogin ? "tel" : "email"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={isPhoneLogin ? "enter your phone number" : "enter your email"}
+              id="login-field"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
               style={{ backgroundColor: '#C3BFBF' }}
             />
@@ -133,7 +135,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         {/* Alternative Login Option */}
         <div className="mt-4 ml-2">
           <button 
-            className="text-sm hover:opacity-80 transition-colors" 
+            type="button"
+            className="text-sm sm:text-base hover:opacity-80 transition-colors" 
             style={{ color: '#7F8CAA', fontSize: '20px' }}
             onClick={() => setIsPhoneLogin(!isPhoneLogin)}
           >
@@ -147,6 +150,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             new user?
           </span>
           <button 
+            type="button"
             onClick={() => onNavigate ? onNavigate('register') : router.push('/register')}
             className="text-white hover:opacity-80 transition-colors font-medium"
             style={{ fontSize: '16px', color: '#7F8CAA' }}
@@ -157,11 +161,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       </div>
 
       {/* Login Button */}
-      <div className="mt-12 w-full max-w-sm px-8">
+      <div className="mt-10 sm:mt-12 w-full max-w-sm px-6 sm:px-8">
         <button 
+          type="button"
           onClick={handleLogin}
           disabled={isLoading}
-          className="w-full border-2 border-white py-4 text-white font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          aria-busy={isLoading}
+          className="w-full border-2 border-white py-3 sm:py-4 text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
           style={{ backgroundColor: '#7F8CAA', borderRadius: '25px' }}
         >
           {isLoading ? 'SENDING OTP...' : 'LOGIN NOW'}

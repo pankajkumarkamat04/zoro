@@ -98,7 +98,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
       <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
         <TopSection showLogo={true} />
         <div className="flex items-center justify-center py-20">
-          <div className="text-white text-xl">Loading transaction status...</div>
+          <div className="text-white text-base sm:text-xl">Loading transaction status...</div>
         </div>
         <BottomNavigation />
       </div>
@@ -133,10 +133,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
         </div>
         
         {/* Status Text */}
-        <h1 
-          className="text-white font-bold mb-2" 
-          style={{ fontSize: '32px', textAlign: 'center' }}
-        >
+        <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl text-center">
           {isTransactionSuccess ? (
             <>Order Placed<br />Successfully</>
           ) : (
@@ -155,9 +152,9 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
               boxShadow: '0px 4px 4px 0px #00000040'
             }}
           >
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row">
               {/* Left Column - Labels */}
-              <div className="w-1/3 space-y-3">
+              <div className="sm:w-1/3 space-y-3 mb-4 sm:mb-0">
                 <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
                 <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Amount</div>
                 {transactionData.utr && (
@@ -173,7 +170,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
               </div>
 
               {/* Vertical Divider */}
-              <div className="w-px bg-white mx-4"></div>
+              <div className="hidden sm:block w-px bg-white mx-4"></div>
 
               {/* Right Column - Values */}
               <div className="flex-1 space-y-3">

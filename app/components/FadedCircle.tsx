@@ -10,8 +10,9 @@ export default function FadedCircle({ top = '812px', left = '-11px', bottom, rig
     <div 
       className="absolute"
       style={{
-        width: '469px',
-        height: '457px',
+        // Make the circle responsive while capping at original size
+        width: 'min(469px, 80vw)',
+        height: 'min(457px, 80vw)',
         ...(bottom ? { bottom, right } : { top, left }),
         opacity: 0.8,
         background: 'radial-gradient(circle, #ffffff29 30%, #ffffff00 70%, #00000000 100%)',

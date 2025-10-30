@@ -157,50 +157,41 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen relative overflow-hidden p-0 m-0 bg-[#232426]">
       {/* Top Section & Welcome Section */}
       <div className="px-4 relative">
         {/* Top Color Effect */}
-        <div 
-          className="absolute top-0 left-0 right-0 h-32 z-0"
-          style={{ 
-            background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
-          }}
-        />
+        <div className="absolute top-0 left-0 right-0 h-32 z-0 bg-gradient-to-b from-[rgba(127,140,170,0.3)] to-transparent" />
         
          {/* Top Navigation */}
          <div className="flex items-center justify-between mb-6 relative z-10">
            {/* Menu Icon */}
-           <button 
-             onClick={() => setIsMenuOpen(true)}
-             className="w-6 h-6 flex flex-col justify-center"
-           >
+          <button 
+            type="button"
+            aria-label="Open menu"
+            onClick={() => setIsMenuOpen(true)}
+            className="w-6 h-6 flex flex-col justify-center"
+          >
              <div className="w-full h-0.5 bg-white mb-1"></div>
              <div className="w-full h-0.5 bg-white mb-1"></div>
              <div className="w-full h-0.5 bg-white"></div>
            </button>
 
            {/* Logo - Center */}
-           <div className="flex items-center justify-center" style={{ marginLeft: '92px' }}>
+          <div className="flex items-center justify-center ml-[92px]">
              <Image
                src="/logo.png"
                alt="Logo"
                width={80}
                height={80}
-               className="mx-auto"
-               style={{ color: 'transparent' }}
+              className="mx-auto"
              />
            </div>
 
           {/* User Profile & Balance */}
           <div className="flex items-center space-x-2">
               <div 
-                className="flex items-center rounded-full px-3 py-1 cursor-pointer"
-                style={{
-                  background: '#232426',
-                  fontSize: '14px',
-                  border: '1px solid #7F8CAA'
-                }}
+                className="flex items-center rounded-full px-3 py-1 cursor-pointer bg-[#232426] text-[14px] border border-[#7F8CAA]"
                 onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
               >
                 <Image
@@ -209,7 +200,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
                   width={26}
                   height={16}
                   className="mr-1"
-                  style={{ color: 'transparent' }}
                 />
                 <span className="font-bold">{isLoading ? '...' : (dashboardData?.walletBalance || 0)}</span>
                 <span className="font-bold ml-1">+</span>
@@ -218,7 +208,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
               className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer"
               onClick={() => onNavigate ? onNavigate('profile') : router.push('/profile')}
             >
-              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#232426' }}>
+              <svg className="w-7 h-7 text-[#232426]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
               </svg>
             </div>
@@ -227,13 +217,13 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
 
         {/* Welcome Content */}
         <div className="relative z-10">
-          <h1 className="text-white font-bold" style={{ fontSize: '32px' }}>
+          <h1 className="text-white font-bold text-2xl sm:text-3xl">
             Welcome,
           </h1>
-          <h1 className="text-gray-300 font-bold mb-4" style={{ fontSize: '32px' }}>
+          <h1 className="text-gray-300 font-bold mb-4 text-2xl sm:text-3xl">
             {isLoading ? 'Loading...' : (user?.name || 'User')}
           </h1>
-          <button className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10" style={{ backgroundColor: '#7F8CAA' }}>
+          <button type="button" className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10" style={{ backgroundColor: '#7F8CAA' }}>
             JOIN WHATSAPP CHANNEL
           </button>
           
@@ -262,7 +252,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
 
       {/* Action Icons */}
       <div 
-        className="flex justify-center space-x-8 py-6" 
+        className="flex justify-center gap-6 sm:space-x-8 flex-wrap py-6" 
         style={{ 
           position: 'relative',
           zIndex: 10,
@@ -434,9 +424,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
                       borderRadius: '22px'
                     }}
                   />
-                  <div className="absolute top-1 left-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">
-                    NEXT
-                  </div>
                 </div>
                 <div 
                   className="text-left py-2 px-3 rounded-lg"

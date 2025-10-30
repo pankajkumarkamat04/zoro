@@ -21,7 +21,7 @@ export default function TopSection({
       <div className="px-4 relative">
         {/* Top Color Effect */}
         <div 
-          className="absolute top-0 left-0 right-0 h-32 z-0"
+          className="absolute top-0 left-0 right-0 h-24 sm:h-32 z-0"
           style={{ 
             background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
           }}
@@ -32,8 +32,8 @@ export default function TopSection({
           <Image
             src="/logo.png"
             alt="Logo"
-            width={80}
-            height={80}
+            width={64}
+            height={64}
             className="mx-auto"
           />
         </div>
