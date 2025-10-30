@@ -42,7 +42,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/dashboard', {
+      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -51,9 +51,15 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       });
 
       if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success && responseData.data) {
-          setWalletBalance(responseData.data.walletBalance || 0);
+        const data = await response.json();
+        const balanceCandidate =
+          (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
+        if (typeof balanceCandidate === 'number') {
+          setWalletBalance(balanceCandidate);
+        } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
+          setWalletBalance(Number(balanceCandidate));
+        } else {
+          setWalletBalance(0);
         }
       } else {
         console.error('Failed to fetch wallet balance');
@@ -278,7 +284,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
           {/* CRED Coins Option */}
           <div
             className={`flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all ${
-              selectedPaymentMethod === 'serene-coins' ? 'ring-4 ring-white' : ''
+              selectedPaymentMethod === 'cred-coins' ? 'ring-4 ring-white' : ''
             } ${
               packDetails && walletBalance < packDetails.packAmount ? 'opacity-60' : ''
             }`}

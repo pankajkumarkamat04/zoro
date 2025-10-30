@@ -47,6 +47,10 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     playerId: '',
     serverId: ''
   });
+  const [validatedInfo, setValidatedInfo] = useState<{
+    nickname: string;
+    server: string;
+  } | null>(null);
   
   useEffect(() => {
     if (gameId) {
@@ -118,12 +122,20 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         const responseData = await response.json();
         if (responseData.response) {
           toast.success('User validated successfully!');
+          if (responseData.data) {
+            setValidatedInfo({
+              nickname: responseData.data.nickname,
+              server: responseData.data.server
+            });
+          }
         } else {
           toast.error(responseData.data?.msg || 'Invalid ID or Server');
+          setValidatedInfo(null);
         }
       } else {
         const errorData = await response.json();
         toast.error(errorData.data?.msg || 'Validation failed. Please try again.');
+        setValidatedInfo(null);
       }
     } catch (error) {
       toast.error('Network error. Please check your connection and try again.');
@@ -207,9 +219,6 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   color: 'transparent'
                 }}
               />
-              <div className="absolute top-1 left-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">
-                NEXT
-              </div>
             </div>
             <div>
               <h3 className="text-white font-bold text-base sm:text-lg">{gameData.name}</h3>
@@ -264,6 +273,19 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                 </svg>
               </button>
             </div>
+            {validatedInfo && (
+              <div
+                className="mt-4 p-4 text-white"
+                style={{
+                  background: 'linear-gradient(90deg, #363B48 0%, #333844 100%)',
+                  borderRadius: '16px',
+                  border: '1px solid #7F8CAA'
+                }}
+              >
+                <p className="text-sm"><span className="font-semibold">Name:</span> {validatedInfo.nickname}</p>
+                <p className="text-sm"><span className="font-semibold">Server:</span> {validatedInfo.server}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

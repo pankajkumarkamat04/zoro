@@ -29,8 +29,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    currentPassword: '',
-    password: ''
+    
   });
   const [isLoading, setIsLoading] = useState(!isAuthenticated);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -83,8 +82,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         setFormData({
           fullName: userData.name,
           email: userData.email,
-          currentPassword: '',
-          password: ''
+          
         });
       } else {
         console.error('Failed to fetch user data');
@@ -186,23 +184,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       return;
     }
 
-    // If password fields are filled, validate them
-    const isChangingPassword = formData.currentPassword.trim() || formData.password.trim();
-    
-    if (isChangingPassword) {
-      if (!formData.currentPassword.trim()) {
-        toast.error('Please enter your current password');
-        return;
-      }
-      if (!formData.password.trim()) {
-        toast.error('Please enter your new password');
-        return;
-      }
-      if (formData.password.length < 6) {
-        toast.error('New password must be at least 6 characters long');
-        return;
-      }
-    }
+    // No password updates on profile page
 
     setIsUpdating(true);
 
@@ -217,18 +199,11 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         return;
       }
 
-      // Build request body - only include password fields if they're not empty
+      // Build request body
       const requestBody: any = {
-        name: formData.fullName
+        name: formData.fullName,
+        email: formData.email,
       };
-
-      // Only add password fields if they're provided
-      if (formData.currentPassword.trim()) {
-        requestBody.currentPassword = formData.currentPassword;
-      }
-      if (formData.password.trim()) {
-        requestBody.password = formData.password;
-      }
 
       const response = await fetch('https://api.leafstore.in/api/v1/user/profile', {
         method: 'PUT',
@@ -241,8 +216,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
 
       if (response.ok) {
         const responseData = await response.json();
-        const updateType = isChangingPassword ? 'Profile' : 'Name';
-        toast.success(responseData.message || `${updateType} updated successfully!`);
+        toast.success(responseData.message || 'Profile updated successfully!');
         
         // Refresh user data
         fetchUserData();
@@ -415,7 +389,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
           )}
 
-          {/* Input Fields */}
+          {/* Input Fields (no password fields) */}
           <div className="space-y-4">
             <div>
               <label htmlFor="profile-fullname" className="text-white text-sm mb-2 block">Full name</label>
@@ -438,34 +412,6 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-2 py-2 rounded-lg text-gray-400"
-                style={{ backgroundColor: '#D9D9D9' }}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="profile-current-password" className="text-white text-sm mb-2 block">Current Password</label>
-              <input
-                type="password"
-                id="profile-current-password"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                placeholder="Enter current password to change password"
-                className="w-full px-2 py-2 rounded-lg text-gray-400"
-                style={{ backgroundColor: '#D9D9D9' }}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="profile-new-password" className="text-white text-sm mb-2 block">New Password</label>
-              <input
-                type="password"
-                id="profile-new-password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Enter new password"
                 className="w-full px-2 py-2 rounded-lg text-gray-400"
                 style={{ backgroundColor: '#D9D9D9' }}
               />

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import DesktopLandingPage from './components/DesktopLandingPage';
 import LoginPage from './components/LoginPage';
-import PublicRoute from './components/PublicRoute';
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
@@ -36,11 +35,7 @@ export default function Home() {
 
   // Show login page directly for mobile users
   if (isMobile) {
-    return (
-      <PublicRoute>
-        <LoginPage />
-      </PublicRoute>
-    );
+    return <LoginPage />;
   }
 
   // Show desktop landing page for desktop users

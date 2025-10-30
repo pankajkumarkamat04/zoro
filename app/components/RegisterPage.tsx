@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -20,8 +20,27 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<null | { isPhoneLogin: boolean }>(null);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  // Prefill and lock phone/email based on previous login method
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('loginData');
+      if (stored) {
+        const parsed = JSON.parse(stored) as { email: string; isPhoneLogin: boolean };
+        setLoginMethod({ isPhoneLogin: parsed.isPhoneLogin });
+        if (parsed.isPhoneLogin) {
+          setFormData(prev => ({ ...prev, phone: parsed.email }));
+        } else {
+          setFormData(prev => ({ ...prev, email: parsed.email }));
+        }
+      }
+    } catch (_) {
+      // ignore parsing errors
+    }
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -36,13 +55,23 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
       toast.error('Please enter your name');
       return;
     }
-    if (!formData.phone.trim()) {
-      toast.error('Please enter your phone number');
-      return;
+    if (!loginMethod?.isPhoneLogin) {
+      if (!formData.phone.trim()) {
+        toast.error('Please enter your phone number');
+        return;
+      }
     }
-    if (!formData.email.trim()) {
-      toast.error('Please enter your email');
-      return;
+    if (loginMethod?.isPhoneLogin) {
+      // phone is prefilled and locked, require email instead
+      if (!formData.email.trim()) {
+        toast.error('Please enter your email');
+        return;
+      }
+    } else {
+      if (!formData.email.trim()) {
+        toast.error('Please enter your email');
+        return;
+      }
     }
     if (!formData.password.trim()) {
       toast.error('Please enter your password');
@@ -51,16 +80,20 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast.error('Please enter a valid email address');
-      return;
+    if (!loginMethod || loginMethod.isPhoneLogin || (!loginMethod && formData.email)) {
+      if (!emailRegex.test(formData.email)) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
     }
 
     // Basic phone validation (10 digits)
     const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
-      toast.error('Please enter a valid 10-digit phone number');
-      return;
+    if (!loginMethod || !loginMethod.isPhoneLogin) {
+      if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
+        toast.error('Please enter a valid 10-digit phone number');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -201,7 +234,11 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
                 color: '#232426',
                 fontSize: '16px'
               }}
+              disabled={!!loginMethod?.isPhoneLogin}
             />
+            {loginMethod?.isPhoneLogin && (
+              <p className="mt-1 text-xs" style={{ color: 'white' }}>prefilled from phone login</p>
+            )}
           </div>
 
           {/* Email Input */}
@@ -227,7 +264,11 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
                 color: '#232426',
                 fontSize: '16px'
               }}
+              disabled={loginMethod?.isPhoneLogin === false}
             />
+            {loginMethod?.isPhoneLogin === false && (
+              <p className="mt-1 text-xs" style={{ color: 'white' }}>prefilled from email login</p>
+            )}
           </div>
 
           {/* Password Input */}

@@ -307,9 +307,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                     boxShadow: '0px 4px 4px 0px #00000040'
                   }}
                 >
-                  <div className="flex flex-col sm:flex-row">
+                  <div className="flex">
                     {/* Left Column - Labels */}
-                    <div className="sm:w-1/3 space-y-3 mb-4 sm:mb-0">
+                    <div className="space-y-3" style={{ width: '120px' }}>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
@@ -321,7 +321,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                     </div>
 
                     {/* Vertical Divider */}
-                    <div className="hidden sm:block w-px bg-white mx-4"></div>
+                    <div className="w-px bg-white mx-4"></div>
 
                     {/* Right Column - Values */}
                     <div className="flex-1 space-y-3">

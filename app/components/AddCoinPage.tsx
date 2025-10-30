@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
+import { useAppSelector } from '@/lib/hooks/redux';
 
 interface AddCoinPageProps {
   onNavigate?: (screen: string) => void;
@@ -13,9 +14,37 @@ interface AddCoinPageProps {
 
 export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
   const router = useRouter();
+  const { token } = useAppSelector((state) => state.auth);
   const [selectedAmount, setSelectedAmount] = useState<string>('');
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  
+  // Fetch wallet balance for display
+  useState(() => {
+    const fetchBalance = async () => {
+      try {
+        const authToken = token || localStorage.getItem('authToken');
+        if (!authToken) return;
+        const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (typeof data.walletBalance === 'number') {
+            setWalletBalance(data.walletBalance);
+          }
+        }
+      } catch {
+        // ignore balance fetch errors
+      }
+    };
+    fetchBalance();
+  });
   
   const coinPacks = [
     { amount: '250' },
@@ -46,8 +75,8 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
     }
 
     const amountNumber = parseInt(amount);
-    if (isNaN(amountNumber) || amountNumber < 100) {
-      toast.error('Minimum amount should be greater than 100');
+    if (isNaN(amountNumber) || amountNumber < 1) {
+      toast.error('Minimum amount should be 1');
       return;
     }
 
@@ -137,7 +166,7 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
               fontWeight: 600
             }}
           >
-            1000 coins
+            {walletBalance} coins
           </div>
         </div>
       </div>
@@ -200,7 +229,7 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
             style={{ backgroundColor: '#D9D9D9' }}
           />
                   <p style={{ fontSize: '15px', color: 'white' }}>
-                    minimum amount should be greater than 100
+                    minimum amount should be 1
                   </p>
           
           <div className="flex justify-center">
