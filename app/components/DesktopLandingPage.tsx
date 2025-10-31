@@ -55,8 +55,8 @@ const DesktopLandingPage: React.FC = () => {
         return <TopUpPage onNavigate={navigateInPhone} />;
       case 'addcoin':
         return <AddCoinPage onNavigate={navigateInPhone} />;
-      case 'checkout':
-        return <PaymentMethodsPage onNavigate={navigateInPhone} />;
+      // case 'checkout':
+      //   return <PaymentMethodsPage onNavigate={navigateInPhone} />;
       case 'contact':
         return <ContactUsPage onNavigate={navigateInPhone} />;
       case 'payment-status':

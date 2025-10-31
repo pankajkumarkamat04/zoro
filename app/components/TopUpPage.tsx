@@ -51,12 +51,174 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     nickname: string;
     server: string;
   } | null>(null);
+  const [showCheckoutPopup, setShowCheckoutPopup] = useState(false);
+  const [selectedPackData, setSelectedPackData] = useState<any>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
   useEffect(() => {
     if (gameId) {
       fetchDiamondPacks();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
+
+  useEffect(() => {
+    if (showCheckoutPopup) {
+      document.body.style.overflow = 'hidden';
+      fetchWalletBalance();
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showCheckoutPopup]);
+
+  const fetchWalletBalance = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        return;
+      }
+
+      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const balanceCandidate =
+          (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
+        if (typeof balanceCandidate === 'number') {
+          setWalletBalance(balanceCandidate);
+        } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
+          setWalletBalance(Number(balanceCandidate));
+        } else {
+          setWalletBalance(0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+    }
+  };
+
+  const processUPIPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        toast.error('Authentication token not found');
+        return;
+      }
+
+      if (!selectedPackData) {
+        toast.error('No pack selected');
+        return;
+      }
+
+      const requestBody = {
+        diamondPackId: selectedPackData.packId,
+        playerId: selectedPackData.playerId,
+        server: selectedPackData.serverId,
+        amount: selectedPackData.packAmount,
+        quantity: 1,
+        redirectUrl: typeof window !== 'undefined' 
+          ? `${window.location.origin}/payment-status`
+          : 'https://leafstore.in/payment-status'
+      };
+
+      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success && responseData.transaction?.paymentUrl) {
+          toast.success('Payment request created successfully! Redirecting...');
+          window.location.href = responseData.transaction.paymentUrl;
+        } else {
+          toast.error(responseData.message || 'Failed to create payment request');
+        }
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to process payment');
+      }
+    } catch (error) {
+      console.error('Error processing UPI payment:', error);
+      toast.error('An error occurred while processing payment');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const processWalletPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        toast.error('Authentication token not found');
+        return;
+      }
+
+      if (!selectedPackData) {
+        toast.error('No pack selected');
+        return;
+      }
+
+      const requestBody = {
+        diamondPackId: selectedPackData.packId,
+        playerId: selectedPackData.playerId,
+        server: selectedPackData.serverId,
+        quantity: 1
+      };
+
+      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success) {
+          toast.success('Payment completed successfully with CRED Coins!');
+          setShowCheckoutPopup(false);
+          if (onNavigate) {
+            onNavigate('home');
+          } else {
+            router.push('/dashboard');
+          }
+        } else {
+          toast.error(responseData.message || 'Failed to process wallet payment');
+        }
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to process payment');
+      }
+    } catch (error) {
+      console.error('Error processing wallet payment:', error);
+      toast.error('An error occurred while processing payment');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
   
   const fetchDiamondPacks = async () => {
     try {
@@ -343,7 +505,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   return;
                 }
 
-                // Store pack details for checkout page
+                // Store pack details for checkout popup
                 const packDetails = {
                   packId: pack._id,
                   gameId: gameId,
@@ -357,11 +519,8 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   serverId: formData.serverId
                 };
                 localStorage.setItem('selectedPack', JSON.stringify(packDetails));
-                if (onNavigate) {
-                  onNavigate('checkout');
-                } else {
-                  router.push('/checkout');
-                }
+                setSelectedPackData(packDetails);
+                setShowCheckoutPopup(true);
               }}
             >
               <div className="relative mb-6">
@@ -405,6 +564,175 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
       {/* Bottom Navigation */}
       <BottomNavigation />
+
+      {/* Checkout Popup */}
+      {showCheckoutPopup && selectedPackData && (
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-30 z-50" style={{ background: '#000000cc' }} />
+          <div className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-50 max-h-[90vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out', backgroundColor: 'rgb(35, 36, 38)' }}>
+            {/* Top Color Effect */}
+            <div 
+              className="sticky top-0 left-0 right-0 h-10 pointer-events-none z-10"
+              style={{ 
+                background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
+              }}
+            />
+            <div className="p-4">
+              {/* Header */}
+              <div className="flex items-center mb-6">
+                <h2 className="flex-1 text-center font-bold text-xl text-white">Checkout</h2>
+                <button
+                  onClick={() => setShowCheckoutPopup(false)}
+                  className="p-2 rounded-full"
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6 text-gray-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Payment Summary */}
+              <div className="mb-6">
+                <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040' }}>
+                  <div className="flex">
+                    <div className="space-y-3" style={{ width: '120px' }}>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Product</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Amount</div>
+                    </div>
+                    <div className="w-px bg-white mx-4"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>
+                        {selectedPackData ? `${selectedPackData.packDescription}` : '—'}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>
+                        {selectedPackData ? `₹${selectedPackData.packAmount}` : '—'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Options */}
+              <div className="mb-8">
+                <div className="space-y-4">
+                  {/* CRED Coins Option */}
+                  <div
+                    className={`p-4 rounded-3xl cursor-pointer transition-all ${selectedPaymentMethod === 'cred-coins' ? 'ring-4 ring-white' : ''} ${selectedPackData && walletBalance < selectedPackData.packAmount ? 'opacity-60' : ''}`}
+                    style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'cred-coins' ? '3px solid white' : 'none' }}
+                    onClick={() => {
+                      if (selectedPackData && walletBalance < selectedPackData.packAmount) {
+                        toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
+                        return;
+                      }
+                      setSelectedPaymentMethod('cred-coins');
+                    }}
+                  >
+                    <div className="flex">
+                      <div className="space-y-3" style={{ width: '120px' }}>
+                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Method</div>
+                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Available</div>
+                      </div>
+                      <div className="w-px bg-white mx-4"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center">
+                          <div className="mr-3">
+                            <Image src="/coin.png" alt="Coin" width={32} height={32} className="rounded-full" style={{ color: 'transparent' }} />
+                          </div>
+                          <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>CRED Coins</span>
+                        </div>
+                        <div>
+                          <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>{walletBalance} coins</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* UPI Option */}
+                  <div
+                    className={`p-4 rounded-3xl cursor-pointer transition-all ${selectedPaymentMethod === 'upi' ? 'ring-4 ring-white' : ''}`}
+                    style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'upi' ? '3px solid white' : 'none' }}
+                    onClick={() => setSelectedPaymentMethod('upi')}
+                  >
+                    <div className="flex">
+                      <div className="space-y-3" style={{ width: '120px' }}>
+                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Method</div>
+                      </div>
+                      <div className="w-px bg-white mx-4"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center">
+                          <div className="mr-3">
+                            <Image src="/UPI_logo.svg.png" alt="UPI Logo" width={40} height={40} className="rounded-lg" />
+                          </div>
+                          <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>UPI</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pay Securely Button */}
+              <div className="mt-8 sm:mt-10 mb-8 flex justify-center">
+                <button
+                  type="button"
+                  className="w-full max-w-sm py-3 sm:py-4 rounded-4xl text-white font-bold text-base sm:text-lg flex items-center justify-center cursor-pointer"
+                  style={{ 
+                    backgroundColor: 'rgb(127, 140, 170)',
+                    border: '1px solid',
+                    fontFamily: 'Poppins',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    lineHeight: '100%',
+                    padding: '17px 100px 17px 100px',
+                    boxShadow: '0px 4px 4px 0px #00000040',
+                    opacity: isProcessingPayment ? 0.7 : 1
+                  }}
+                  aria-busy={isProcessingPayment}
+                  disabled={isProcessingPayment}
+                  onClick={async () => {
+                    if (!selectedPaymentMethod) {
+                      toast.error('Please select a payment method');
+                      return;
+                    }
+                    
+                    if (selectedPaymentMethod === 'cred-coins') {
+                      if (!selectedPackData) {
+                        toast.error('No pack selected');
+                        return;
+                      }
+                      
+                      if (walletBalance < selectedPackData.packAmount) {
+                        toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
+                        return;
+                      }
+                      
+                      await processWalletPayment();
+                    } else if (selectedPaymentMethod === 'upi') {
+                      await processUPIPayment();
+                    }
+                  }}
+                >
+                  {isProcessingPayment ? 'PROCESSING...' : 'PAY SECURELY'}
+                  <svg className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <style jsx>{`
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
