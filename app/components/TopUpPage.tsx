@@ -295,12 +295,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
         {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-nowrap gap-2 mb-6 overflow-x-auto">
           {filterButtons.map((button, index) => (
             <button
               key={index}
               type="button"
-              className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white"
+              className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white whitespace-nowrap shrink-0"
               style={{
                 background: 'rgb(35, 36, 38)',
                 border: '1px solid rgb(127, 140, 170)',

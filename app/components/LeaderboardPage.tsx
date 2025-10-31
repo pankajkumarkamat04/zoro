@@ -38,15 +38,9 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (isAuthenticated && token) {
+    // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
+    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchLeaderboardData();
-    } else if (!isAuthenticated) {
-      if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
     }
   }, [isAuthenticated, token]);
 

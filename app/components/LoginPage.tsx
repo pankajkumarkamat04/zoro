@@ -29,7 +29,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     dispatch(loginStart());
 
     try {
-      const requestBody = isPhoneLogin 
+      const requestBody = isPhoneLogin
         ? { phone: email }
         : { email: email };
 
@@ -134,9 +134,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
         {/* Alternative Login Option */}
         <div className="mt-4 ml-2">
-          <button 
+          <button
             type="button"
-            className="text-sm sm:text-base hover:opacity-80 transition-colors" 
+            className="text-sm sm:text-base hover:opacity-80 transition-colors"
             style={{ color: '#7F8CAA', fontSize: '20px' }}
             onClick={() => setIsPhoneLogin(!isPhoneLogin)}
           >
@@ -144,30 +144,16 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           </button>
         </div>
 
-        {/* Register Link */}
-        <div className="mt-6 text-center">
-          <span className="text-white mr-2" style={{ fontSize: '16px' }}>
-            new user?
-          </span>
-          <button 
-            type="button"
-            onClick={() => onNavigate ? onNavigate('register') : router.push('/register')}
-            className="text-white hover:opacity-80 transition-colors font-medium"
-            style={{ fontSize: '16px', color: '#7F8CAA' }}
-          >
-            Register Now
-          </button>
-        </div>
       </div>
 
       {/* Login Button */}
       <div className="mt-10 sm:mt-12 w-full max-w-sm px-6 sm:px-8">
-        <button 
+        <button
           type="button"
           onClick={handleLogin}
           disabled={isLoading}
           aria-busy={isLoading}
-          className="w-full border-2 border-white py-3 sm:py-4 text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          className="w-full border-2 border-white py-3 sm:py-4 text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ backgroundColor: '#7F8CAA', borderRadius: '25px' }}
         >
           {isLoading ? 'SENDING OTP...' : 'LOGIN NOW'}

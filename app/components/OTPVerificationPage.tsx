@@ -117,8 +117,20 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
           // Clear login data from localStorage
           localStorage.removeItem('loginData');
           
-          // Navigate to dashboard after a short delay
+          // Navigate to intended path or dashboard after a short delay
           setTimeout(() => {
+            try {
+              const intended = localStorage.getItem('intendedPath');
+              if (intended) {
+                localStorage.removeItem('intendedPath');
+                if (onNavigate) {
+                  onNavigate('home');
+                } else {
+                  router.push(intended);
+                  return;
+                }
+              }
+            } catch {}
             if (onNavigate) {
               onNavigate('home');
             } else {

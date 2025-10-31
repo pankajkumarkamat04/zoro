@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/lib/hooks/redux';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
@@ -60,17 +60,12 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [searchDate, setSearchDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (isAuthenticated && token) {
+    // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
+    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchOrderHistory();
-    } else if (!isAuthenticated) {
-      if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
     }
   }, [currentPage, isAuthenticated, token]);
 
@@ -219,69 +214,75 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
         )}
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="px-4 mb-6">
-        <div className="space-y-4" role="search">
-          {/* Search by Order ID */}
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="search by order id"
-              aria-label="search by order id"
-              className="w-full px-4 py-3 rounded-lg text-black placeholder-gray-500"
-              style={{ backgroundColor: '#D9D9D9' }}
-              value={searchOrderId}
-              onChange={(e) => setSearchOrderId(e.target.value)}
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
+      {/* Search and Filter Section - Styled like reference */}
+      <div className="px-4 mb-6" role="search">
+        {/* Row 1: Search by Order ID + icon button */}
+        <div className="flex items-center">
+          <input 
+            type="text" 
+            placeholder="search by order id"
+            aria-label="search by order id"
+            className="flex-1 px-4 py-3 rounded-2xl text-black placeholder-gray-500"
+            style={{ backgroundColor: '#D9D9D9' }}
+            value={searchOrderId}
+            onChange={(e) => setSearchOrderId(e.target.value)}
+          />
+          <button
+            type="button"
+            aria-label="search"
+            onClick={handleSearch}
+            className="ml-2 flex items-center justify-center rounded-2xl"
+            style={{ width: '40px', height: '40px' }}
+          >
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
 
-          {/* Date Input, Status Filter and Search Button */}
-          <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
-            <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <input 
-                type="date" 
-                placeholder="dd-mm-yyyy"
-                aria-label="filter by date"
-                className="w-full pl-10 pr-4 py-3 rounded-lg text-black placeholder-gray-500"
-                style={{ backgroundColor: '#D9D9D9' }}
-                value={searchDate}
-                onChange={(e) => setSearchDate(e.target.value)}
-              />
-            </div>
-            <div className="relative flex-1">
-              <select 
-                className="w-full px-4 py-3 rounded-lg text-black"
-                aria-label="filter by status"
-                style={{ backgroundColor: '#D9D9D9' }}
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <button 
-              type="button"
-              className="px-6 py-3 rounded-lg text-white font-medium"
-              style={{ backgroundColor: '#363B48' }}
-              onClick={handleSearch}
-            >
-              search
-            </button>
-          </div>
+        {/* Row 2: Calendar button + date input + search button */}
+        <div className="mt-3 flex items-center">
+          <button
+            type="button"
+            aria-label="open calendar"
+            onClick={() => {
+              try {
+                // @ts-ignore - showPicker not in TS lib yet for all targets
+                if (dateInputRef.current && dateInputRef.current.showPicker) {
+                  // @ts-ignore
+                  dateInputRef.current.showPicker();
+                } else {
+                  dateInputRef.current?.focus();
+                }
+              } catch {
+                dateInputRef.current?.focus();
+              }
+            }}
+            className="flex items-center justify-center"
+            style={{ width: '36px', height: '36px', borderRadius: '8px'}}
+          >
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <input 
+            ref={dateInputRef}
+            type="date" 
+            placeholder="dd-mm-yyyy"
+            aria-label="filter by date"
+            className="flex-1 ml-2 px-4 py-3 rounded-2xl text-black placeholder-gray-500"
+            style={{ backgroundColor: '#D9D9D9' }}
+            value={searchDate}
+            onChange={(e) => setSearchDate(e.target.value)}
+          />
+          <button 
+            type="button"
+            className="ml-2 px-5 py-2 rounded-2xl text-white font-medium"
+            style={{ backgroundColor: 'rgb(35, 36, 38)', border: '1px solid rgb(127, 140, 170)' }}
+            onClick={handleSearch}
+          >
+            search
+          </button>
         </div>
       </div>
 

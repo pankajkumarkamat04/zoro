@@ -131,8 +131,20 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
         
         toast.success(responseData.message || 'Registration successful! Welcome to Creds Zone.');
         
-        // Navigate to dashboard after successful registration
+        // Navigate to intended path or dashboard after successful registration
         setTimeout(() => {
+          try {
+            const intended = localStorage.getItem('intendedPath');
+            if (intended) {
+              localStorage.removeItem('intendedPath');
+              if (onNavigate) {
+                onNavigate('home');
+              } else {
+                router.push(intended);
+                return;
+              }
+            }
+          } catch {}
           if (onNavigate) {
             onNavigate('home');
           } else {

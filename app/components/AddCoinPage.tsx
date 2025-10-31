@@ -85,11 +85,8 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        if (onNavigate) {
-          onNavigate('login');
-        } else {
-          router.push('/login');
-        }
+        toast.error('You need to be logged in to add coins');
+        // Let ProtectedRoute handle navigation if needed
         return;
       }
 

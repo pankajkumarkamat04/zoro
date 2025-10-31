@@ -34,11 +34,8 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        if (onNavigate) {
-          onNavigate('login');
-        } else {
-          router.push('/login');
-        }
+        // Let ProtectedRoute handle navigation; just stop loading
+        setIsLoading(false);
         return;
       }
 
@@ -229,70 +226,34 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         <h1 className="text-white font-bold text-xl sm:text-2xl">Payment Methods</h1>
       </div>
 
-      {/* Payment Summary */}
+      {/* Payment Summary - Order-style box */}
       <div className="px-4 mb-6">
-        <div
-          className="flex items-center justify-between "
-        >
-           <div 
-             className="flex items-center py-2 px-4 rounded-3xl" 
-             style={{ 
-               background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
-               boxShadow: '0px 4px 4px 0px #00000040',
-               fontFamily: 'Poppins',
-               fontWeight: 600,
-               fontStyle: 'normal',
-               fontSize: '16px',
-               lineHeight: '100%',
-               letterSpacing: '0%'
-             }}
-           >
-             <span 
-               className="text-white" 
-               style={{
-                 fontFamily: 'Poppins',
-                 fontWeight: 600,
-                 fontStyle: 'normal',
-                 fontSize: '16px',
-                 lineHeight: '100%',
-                 letterSpacing: '0%'
-               }}
-             >
-               {packDetails ? `${packDetails.packDescription}` : 'Amount'}
-             </span>
-             <div className="w-px h-6 bg-gray-400 mx-4"></div>
-             <span 
-               className="text-white font-bold" 
-               style={{
-                 fontFamily: 'Poppins',
-                 fontWeight: 600,
-                 fontStyle: 'normal',
-                 fontSize: '16px',
-                 lineHeight: '100%',
-                 letterSpacing: '0%'
-               }}
-             >
-               {packDetails ? `₹${packDetails.packAmount}` : isLoading ? 'Loading...' : '₹800'}
-             </span>
-           </div>
+        <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040' }}>
+          <div className="flex">
+            <div className="space-y-3" style={{ width: '120px' }}>
+              <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Product</div>
+              <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Amount</div>
+            </div>
+            <div className="w-px bg-white mx-4"></div>
+            <div className="flex-1 space-y-3">
+              <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>
+                {packDetails ? `${packDetails.packDescription}` : '—'}
+              </div>
+              <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>
+                {packDetails ? `₹${packDetails.packAmount}` : isLoading ? 'Loading...' : '—'}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Payment Options */}
       <div className="px-4 mb-8">
         <div className="space-y-4">
-          {/* CRED Coins Option */}
+          {/* CRED Coins Option - Order-style box */}
           <div
-            className={`flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all ${
-              selectedPaymentMethod === 'cred-coins' ? 'ring-4 ring-white' : ''
-            } ${
-              packDetails && walletBalance < packDetails.packAmount ? 'opacity-60' : ''
-            }`}
-            style={{ 
-              background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
-              boxShadow: '0px 4px 4px 0px #00000040',
-              border: selectedPaymentMethod === 'serene-coins' ? '3px solid white' : 'none'
-            }}
+            className={`p-4 rounded-3xl cursor-pointer transition-all ${selectedPaymentMethod === 'cred-coins' ? 'ring-4 ring-white' : ''} ${packDetails && walletBalance < packDetails.packAmount ? 'opacity-60' : ''}`}
+            style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'cred-coins' ? '3px solid white' : 'none' }}
             onClick={() => {
               if (packDetails && walletBalance < packDetails.packAmount) {
                 toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
@@ -301,60 +262,45 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
               setSelectedPaymentMethod('cred-coins');
             }}
           >
-             <div className="flex items-center">
-               <div className="mr-4">
-                 <Image
-                   src="/coin.png"
-                   alt="Coin"
-                   width={48}
-                   height={48}
-                   className="rounded-full"
-                   style={{ color: 'transparent' }}
-                 />
-               </div>
-              <div>
-                <p className="text-white text-sm" style={{ fontSize: '16px', fontWeight: 600 }}>CRED Coins</p>
-                <p className="text-white font-bold text-sm" style={{ fontSize: '20px', fontWeight: 700 }}>Available Balance</p>
+            <div className="flex">
+              <div className="space-y-3" style={{ width: '120px' }}>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Method</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Available</div>
               </div>
-            </div>
-            <div
-              className="px-3 py-1 rounded-lg"
-              style={{ 
-                backgroundColor: '#232426',
-                border: '1px solid',
-                borderRadius: '20px'
-              }}
-            >
-              <span className="text-white text-sm">
-                {isLoading ? '...' : `${walletBalance} coins`}
-              </span>
+              <div className="w-px bg-white mx-4"></div>
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center">
+                  <div className="mr-3">
+                    <Image src="/coin.png" alt="Coin" width={32} height={32} className="rounded-full" style={{ color: 'transparent' }} />
+                  </div>
+                  <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>CRED Coins</span>
+                </div>
+                <div>
+                  <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>{isLoading ? '...' : `${walletBalance} coins`}</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* UPI Option */}
+          {/* UPI Option - Order-style box */}
           <div
-            className={`flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all ${
-              selectedPaymentMethod === 'upi' ? 'ring-4 ring-white' : ''
-            }`}
-            style={{ 
-              background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
-              boxShadow: '0px 4px 4px 0px #00000040',
-              border: selectedPaymentMethod === 'upi' ? '3px solid white' : 'none'
-            }}
+            className={`p-4 rounded-3xl cursor-pointer transition-all ${selectedPaymentMethod === 'upi' ? 'ring-4 ring-white' : ''}`}
+            style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'upi' ? '3px solid white' : 'none' }}
             onClick={() => setSelectedPaymentMethod('upi')}
           >
-            <div className="flex items-center">
-              <div className="mr-4">
-                <Image
-                  src="/UPI_logo.svg.png"
-                  alt="UPI Logo"
-                  width={48}
-                  height={48}
-                  className="rounded-lg"
-                />
+            <div className="flex">
+              <div className="space-y-3" style={{ width: '120px' }}>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px' }}>Method</div>
               </div>
-              <div className="w-px h-8 bg-gray-400 mx-4"></div>
-              <span className="text-white text-sm">UPI</span>
+              <div className="w-px bg-white mx-4"></div>
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center">
+                  <div className="mr-3">
+                    <Image src="/UPI_logo.svg.png" alt="UPI Logo" width={40} height={40} className="rounded-lg" />
+                  </div>
+                  <span className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px' }}>UPI</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

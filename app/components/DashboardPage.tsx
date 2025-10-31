@@ -50,17 +50,10 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (isAuthenticated && token) {
+    // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
+    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchDashboardData();
       fetchGames();
-    } else if (!isAuthenticated) {
-      // If not authenticated, redirect to login
-      if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
     }
   }, [isAuthenticated, token]);
 
@@ -74,11 +67,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const fetchDashboardData = async () => {
     try {
       if (!token) {
-        if (onNavigate) {
-          onNavigate('login');
-        } else {
-          router.push('/login');
-        }
         return;
       }
 
@@ -161,7 +149,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
       {/* Top Section & Welcome Section */}
       <div className="px-4 relative">
         {/* Top Color Effect */}
-        <div className="absolute top-0 left-0 right-0 h-32 z-0 bg-gradient-to-b from-[rgba(127,140,170,0.3)] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-32 z-0 bg-linear-to-b from-[rgba(127,140,170,0.3)] to-transparent" />
         
          {/* Top Navigation */}
          <div className="flex items-center justify-between mb-6 relative z-10">
@@ -265,7 +253,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
         >
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
+            className="md:w-16 md:h-16 w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2"
             style={{
               backgroundColor: 'rgb(30, 30, 30)',
               borderColor: 'rgb(35, 36, 38)',
@@ -283,7 +271,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
         >
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
+            className="md:w-16 md:h-16 w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2"
             style={{
               backgroundColor: 'rgb(30, 30, 30)',
               borderColor: 'rgb(35, 36, 38)',
@@ -301,7 +289,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           onClick={() => onNavigate ? onNavigate('leaderboard') : router.push('/leaderboard')}
         >
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
+            className="sm:w-16 sm:h-16 w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2"
             style={{
               backgroundColor: 'rgb(30, 30, 30)',
               borderColor: 'rgb(35, 36, 38)',
@@ -319,7 +307,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           onClick={() => onNavigate ? onNavigate('contact') : router.push('/contact')}
         >
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center border-2 mb-2"
+            className="md:w-16 md:h-16 w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2"
             style={{
               backgroundColor: 'rgb(30, 30, 30)',
               borderColor: 'rgb(35, 36, 38)',

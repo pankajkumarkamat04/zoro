@@ -15,7 +15,7 @@ interface ProfileDashboardPageProps {
 
 export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPageProps = {}) {
   const router = useRouter();
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token } = useAppSelector((state: any) => state.auth);
   const [userData, setUserData] = useState<{
     _id: string;
     name: string;
@@ -38,15 +38,9 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (isAuthenticated && token) {
+    // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
+    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchUserData();
-    } else if (!isAuthenticated) {
-      if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
     }
   }, [isAuthenticated, token]);
 

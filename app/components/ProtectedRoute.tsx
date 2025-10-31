@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppSelector } from '@/lib/hooks/redux';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import AuthChecker from './AuthChecker';
 
@@ -16,31 +16,25 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Check if user is on desktop and redirect to desktop page
-    if (typeof window !== 'undefined') {
-      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-      
-      if (isDesktop) {
-        router.push('/desktop');
-        return;
-      }
-    }
-
     // Only redirect if we're not loading and definitely not authenticated
     if (!isLoading && !isAuthenticated) {
       // Check if we have a token in localStorage as fallback (client-side only)
       if (typeof window !== 'undefined') {
         const localToken = localStorage.getItem('authToken');
         if (!localToken) {
+          try {
+            localStorage.setItem('intendedPath', pathname || '/');
+          } catch {}
           router.push(redirectTo);
         }
       } else {
         router.push(redirectTo);
       }
     }
-  }, [isAuthenticated, isLoading, router, redirectTo]);
+  }, [isAuthenticated, isLoading, router, redirectTo, pathname]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
