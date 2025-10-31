@@ -18,6 +18,7 @@ import AddCoinPage from './AddCoinPage';
 import PaymentMethodsPage from './PaymentMethodsPage';
 import ContactUsPage from './ContactUsPage';
 import PaymentStatusPage from './PaymentStatusPage';
+import NewsPage from './NewsPage';
 
 const DesktopLandingPage: React.FC = () => {
   const router = useRouter();
@@ -61,6 +62,8 @@ const DesktopLandingPage: React.FC = () => {
         return <ContactUsPage onNavigate={navigateInPhone} />;
       case 'payment-status':
         return <PaymentStatusPage onNavigate={navigateInPhone} />;
+      case 'news':
+        return <NewsPage onNavigate={navigateInPhone} />;
       default:
         // Default to login if not authenticated, dashboard if authenticated
         return isAuthenticated ? <DashboardPage onNavigate={navigateInPhone} /> : <LoginPage onNavigate={navigateInPhone} />;

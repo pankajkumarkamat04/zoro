@@ -50,6 +50,43 @@ interface OrderHistoryPageProps {
   onNavigate?: (screen: string) => void;
 }
 
+interface LedgerTransaction {
+  _id: string;
+  userId: string;
+  transactionType: 'credit' | 'debit';
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  reference: string;
+  referenceType: string;
+  description: string;
+  status: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdByType: string;
+  isReversal: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  metadata?: any;
+}
+
+interface LedgerResponse {
+  success: boolean;
+  data: {
+    transactions: LedgerTransaction[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
 interface WalletTransaction {
   id: string;
   type: 'credit' | 'debit';
@@ -57,6 +94,46 @@ interface WalletTransaction {
   description: string;
   date: string;
   status: string;
+  balanceBefore?: number;
+  balanceAfter?: number;
+  reference?: string;
+  referenceType?: string;
+}
+
+interface TransactionResponse {
+  _id: string;
+  userId: string;
+  orderId: string;
+  amount: number;
+  paymentNote: string;
+  customerName: string;
+  customerEmail: string;
+  customerNumber: string;
+  redirectUrl: string;
+  status: string;
+  gatewayId: string;
+  gatewayType: string;
+  gatewayResponse: any;
+  udf1: string;
+  udf2: string;
+  createdAt: string;
+  updatedAt: string;
+  gatewayOrderId?: string;
+  payerUpi?: string;
+  txnId?: string;
+  utr?: string;
+}
+
+interface TransactionHistoryResponse {
+  success: boolean;
+  transactions: TransactionResponse[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalTransactions: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 }
 
 interface PaymentTransaction {
@@ -67,6 +144,8 @@ interface PaymentTransaction {
   date: string;
   status: string;
   transactionId: string;
+  orderId?: string;
+  payerUpi?: string;
 }
 
 export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps = {}) {
@@ -85,92 +164,14 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [selectedWalletTransaction, setSelectedWalletTransaction] = useState<WalletTransaction | null>(null);
   const [showWalletDetails, setShowWalletDetails] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(1250);
+  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
+  const [walletPagination, setWalletPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
+  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
+  const [paymentPagination, setPaymentPagination] = useState({ currentPage: 1, totalPages: 0, totalTransactions: 0, hasNextPage: false, hasPrevPage: false });
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const paymentDateInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Demo wallet transactions data
-  const demoWalletTransactions: WalletTransaction[] = [
-    {
-      id: 'WTX-001',
-      type: 'credit',
-      amount: 500,
-      description: 'Payment from Order ORD-001',
-      date: '2025-10-15T14:30:00',
-      status: 'completed'
-    },
-    {
-      id: 'WTX-002',
-      type: 'debit',
-      amount: 250,
-      description: 'Purchase - Mobile Legends Diamonds',
-      date: '2025-10-14T10:15:00',
-      status: 'completed'
-    },
-    {
-      id: 'WTX-003',
-      type: 'credit',
-      amount: 1000,
-      description: 'Top Up - Bank Transfer',
-      date: '2025-10-10T09:45:00',
-      status: 'completed'
-    },
-    {
-      id: 'WTX-004',
-      type: 'debit',
-      amount: 100,
-      description: 'Purchase - Free Fire Diamonds',
-      date: '2025-10-08T16:20:00',
-      status: 'completed'
-    },
-    {
-      id: 'WTX-005',
-      type: 'credit',
-      amount: 300,
-      description: 'Refund - Order ORD-005',
-      date: '2025-10-05T11:30:00',
-      status: 'completed'
-    }
-  ];
-
-  // Demo payment history data
-  const demoPaymentHistory: PaymentTransaction[] = [
-    {
-      id: 'PAY-001',
-      method: 'UPI',
-      amount: 500,
-      description: 'Add Coins - 500',
-      date: '2025-10-20T15:30:00',
-      status: 'success',
-      transactionId: 'TXN9284919695620942'
-    },
-    {
-      id: 'PAY-002',
-      method: 'Bank Transfer',
-      amount: 1000,
-      description: 'Add Coins - 1000',
-      date: '2025-10-18T11:20:00',
-      status: 'success',
-      transactionId: 'TXN4736251829374651'
-    },
-    {
-      id: 'PAY-003',
-      method: 'Credit Card',
-      amount: 250,
-      description: 'Add Coins - 250',
-      date: '2025-10-15T09:45:00',
-      status: 'failed',
-      transactionId: 'TXN1928374659182736'
-    },
-    {
-      id: 'PAY-004',
-      method: 'UPI',
-      amount: 750,
-      description: 'Add Coins - 750',
-      date: '2025-10-12T14:15:00',
-      status: 'success',
-      transactionId: 'TXN8495721039485762'
-    }
-  ];
 
   useEffect(() => {
     // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
@@ -178,6 +179,22 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       fetchOrderHistory();
     }
   }, [currentPage, isAuthenticated, token]);
+
+  useEffect(() => {
+    // Fetch wallet transactions when wallet tab is active
+    if (activeTab === 'wallet' && isAuthenticated && token) {
+      fetchWalletTransactions();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, isAuthenticated, token, walletPagination.page]);
+
+  useEffect(() => {
+    // Fetch payment transactions when payment tab is active
+    if (activeTab === 'payment' && isAuthenticated && token) {
+      fetchPaymentHistory();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, isAuthenticated, token, paymentPagination.currentPage]);
 
   // Update loading state when authentication changes
   useEffect(() => {
@@ -243,6 +260,125 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       setError('Failed to load order history');
     }
     // Remove setIsLoading(false) from here - loading state is managed by auth state
+  };
+
+  const fetchWalletTransactions = async () => {
+    try {
+      setIsLoadingWallet(true);
+      if (!token) {
+        setError('Authentication token not found');
+        return;
+      }
+
+      // Build query parameters for ledger API
+      const queryParams = new URLSearchParams({
+        page: walletPagination.page.toString(),
+        limit: walletPagination.limit.toString()
+      });
+
+      // Add date range if needed (using current month as default)
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      queryParams.append('startDate', startOfMonth.toISOString());
+      queryParams.append('endDate', endOfMonth.toISOString());
+
+      const response = await fetch(`https://api.leafstore.in/api/v1/order/history?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch wallet transactions');
+      }
+
+      const data: LedgerResponse = await response.json();
+      
+      if (data.success && data.data) {
+        // Transform ledger transactions to wallet transactions
+        const transformed = data.data.transactions.map((tx: LedgerTransaction) => ({
+          id: tx._id,
+          type: tx.transactionType,
+          amount: tx.amount,
+          description: tx.description,
+          date: tx.createdAt,
+          status: tx.status,
+          balanceBefore: tx.balanceBefore,
+          balanceAfter: tx.balanceAfter,
+          reference: tx.reference,
+          referenceType: tx.referenceType
+        })) as WalletTransaction[];
+
+        setWalletTransactions(transformed);
+        setWalletPagination(data.data.pagination);
+        
+        // Update wallet balance from the most recent transaction (first in the list)
+        if (transformed.length > 0 && transformed[0].balanceAfter) {
+          setWalletBalance(transformed[0].balanceAfter);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching wallet transactions:', error);
+      setError('Failed to load wallet transactions');
+    } finally {
+      setIsLoadingWallet(false);
+    }
+  };
+
+  const fetchPaymentHistory = async () => {
+    try {
+      setIsLoadingPayment(true);
+      if (!token) {
+        setError('Authentication token not found');
+        return;
+      }
+
+      // Build query parameters for payment/transaction history API
+      const queryParams = new URLSearchParams({
+        page: paymentPagination.currentPage.toString(),
+        limit: '10'
+      });
+
+      const response = await fetch(`https://api.leafstore.in/api/v1/transaction/history?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch payment transactions');
+      }
+
+      const data: TransactionHistoryResponse = await response.json();
+      
+      if (data.success && data.transactions) {
+        // Transform transaction response to payment transactions
+        const transformed = data.transactions.map((tx: TransactionResponse) => ({
+          id: tx._id,
+          method: tx.gatewayType.toUpperCase(),
+          amount: tx.amount,
+          description: tx.paymentNote,
+          date: tx.createdAt,
+          status: tx.status,
+          transactionId: tx.txnId || tx.gatewayOrderId || tx._id,
+          orderId: tx.orderId,
+          payerUpi: tx.payerUpi
+        })) as PaymentTransaction[];
+
+        setPaymentTransactions(transformed);
+        setPaymentPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('Error fetching payment transactions:', error);
+      setError('Failed to load payment transactions');
+    } finally {
+      setIsLoadingPayment(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -636,13 +772,18 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
         {activeTab === 'wallet' && (
           <div className="space-y-4">
-            {demoWalletTransactions.length === 0 ? (
+            {isLoadingWallet ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="text-white text-lg">Loading transactions...</div>
+              </div>
+            ) : walletTransactions.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-white text-lg">No transactions found</div>
                 <div className="text-gray-400 text-sm mt-2">You haven't made any transactions yet</div>
               </div>
             ) : (
-              demoWalletTransactions.map((transaction) => {
+              walletTransactions.map((transaction) => {
                 return (
                   <div 
                     key={transaction.id}
@@ -694,13 +835,18 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
         {activeTab === 'payment' && (
           <div className="space-y-4">
-            {demoPaymentHistory.length === 0 ? (
+            {isLoadingPayment ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="text-white text-lg">Loading transactions...</div>
+              </div>
+            ) : paymentTransactions.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-white text-lg">No payments found</div>
                 <div className="text-gray-400 text-sm mt-2">You haven't made any payments yet</div>
               </div>
             ) : (
-              demoPaymentHistory.map((payment) => {
+              paymentTransactions.map((payment) => {
                 return (
                   <div 
                     key={payment.id}

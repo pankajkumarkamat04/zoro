@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { IoMdHome } from 'react-icons/io';
 import { LuGrid2X2 } from 'react-icons/lu';
 import { GiShoppingBag } from 'react-icons/gi';
-import { RiQuestionLine } from 'react-icons/ri';
+import { MdNewspaper } from 'react-icons/md';
 
 interface BottomNavigationProps {
   onNavigate?: (screen: string) => void;
@@ -49,12 +49,12 @@ export default function BottomNavigation({ onNavigate }: BottomNavigationProps =
           <GiShoppingBag className="w-6 h-6 text-white" />
         </div>
         
-        {/* Help/Support */}
+        {/* News */}
         <div 
           className="flex items-center justify-center cursor-pointer"
-          onClick={() => router.push('/contact')}
+          onClick={() => router.push('/news')}
         >
-          <RiQuestionLine className="w-6 h-6 text-white" />
+          <MdNewspaper className="w-6 h-6 text-white" />
         </div>
       </div>
     </nav>

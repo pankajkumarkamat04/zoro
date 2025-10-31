@@ -56,6 +56,8 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [allCategories, setAllCategories] = useState<string[]>([]);
   
   useEffect(() => {
     if (gameId) {
@@ -235,6 +237,10 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         if (responseData.success) {
           setGameData(responseData.gameData);
           setDiamondPacks(responseData.diamondPacks);
+          
+          // Extract unique categories from diamond packs
+          const categories = ['All', ...Array.from(new Set(responseData.diamondPacks.map((pack: any) => pack.category).filter(Boolean))) as string[]];
+          setAllCategories(categories);
         }
       } else {
         console.error('Failed to fetch diamond packs');
@@ -306,11 +312,10 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     }
   };
 
-  const filterButtons = [
-    { name: 'Diamonds', icon: '/daimond.png', active: true },
-    { name: 'Weekly Pass', icon: '/daimond.png', active: false },
-    { name: 'First Recharge Bonus', icon: '/daimond.png', active: false }
-  ];
+  // Filter diamond packs by selected category
+  const filteredDiamondPacks = selectedCategory === 'All' 
+    ? diamondPacks 
+    : diamondPacks.filter(pack => pack.category === selectedCategory);
 
   if (isLoading) {
     return (
@@ -457,34 +462,30 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
         {/* Filter Buttons */}
-        <div className="flex flex-nowrap gap-2 mb-6 overflow-x-auto">
-          {filterButtons.map((button, index) => (
-            <button
-              key={index}
-              type="button"
-              className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white whitespace-nowrap shrink-0"
-              style={{
-                background: 'rgb(35, 36, 38)',
-                border: '1px solid rgb(127, 140, 170)',
-                padding: '8px 12px',
-                borderRadius: '25px'
-              }}
-            >
-              <Image
-                src={button.icon}
-                alt={button.name}
-                width={16}
-                height={16}
-                className="mr-1"
-              />
-              {button.name}
-            </button>
-          ))}
-        </div>
+        {allCategories.length > 0 && (
+          <div className="flex flex-nowrap gap-2 mb-6 overflow-x-auto">
+            {allCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+                className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white whitespace-nowrap shrink-0"
+                style={{
+                  background: selectedCategory === category ? 'rgb(75, 85, 99)' : 'rgb(35, 36, 38)',
+                  border: '1px solid rgb(127, 140, 170)',
+                  padding: '8px 12px',
+                  borderRadius: '25px'
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
 
          {/* Diamond Pack Cards */}
          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {diamondPacks.map((pack, index) => (
+          {filteredDiamondPacks.map((pack, index) => (
             <div
               key={pack._id}
               className="cursor-pointer"
