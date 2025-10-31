@@ -83,13 +83,14 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
       month: 'long',
-      day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      hour12: false
     });
   };
 
@@ -115,18 +116,22 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
       </div>
 
       {/* Status Section */}
-      <div className="flex flex-col items-center py-8">
+      <div className="flex flex-col items-center py-6">
         {/* Status Icon */}
         <div 
-          className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-          style={{ backgroundColor: isTransactionSuccess ? '#20B2AA' : '#DC2626' }}
+          className="rounded-full flex items-center justify-center mb-4"
+          style={{ 
+            width: '80px', 
+            height: '80px',
+            backgroundColor: isTransactionSuccess ? '#20B2AA' : '#DC2626' 
+          }}
         >
           {isTransactionSuccess ? (
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
           ) : (
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
             </svg>
           )}
@@ -137,14 +142,14 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
           {isTransactionSuccess ? (
             <>Order Placed<br />Successfully</>
           ) : (
-            <>Failed To Place<br />Order</>
+            <>Failed To Place Order</>
           )}
         </h1>
       </div>
 
       {/* Transaction Details Card */}
       {transactionData && (
-        <div className="mx-4 mb-6">
+        <div className="px-4 mb-6">
           <div 
             className="p-4 rounded-lg"
             style={{ 
@@ -152,67 +157,48 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
               boxShadow: '0px 4px 4px 0px #00000040'
             }}
           >
-            <div className="flex flex-col sm:flex-row">
+            <div className="flex">
               {/* Left Column - Labels */}
-              <div className="sm:w-1/3 space-y-3 mb-4 sm:mb-0">
+              <div className="space-y-3" style={{ width: '120px' }}>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
                 <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Amount</div>
-                {transactionData.utr && (
-                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>UTR</div>
-                )}
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Gateway</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Customer</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Email</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Phone</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Note</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Created At</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
+                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
                 <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
               </div>
 
               {/* Vertical Divider */}
-              <div className="hidden sm:block w-px bg-white mx-4"></div>
+              <div className="w-px bg-white mx-4"></div>
 
               {/* Right Column - Values */}
               <div className="flex-1 space-y-3">
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                <div className="text-green-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                  {formatDate(transactionData.createdAt)}
+                </div>
+                <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                   {transactionData.orderId}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.amount} INR
-                </div>
-                {transactionData.utr && (
-                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                    {transactionData.utr}
-                  </div>
-                )}
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.gatewayType}
                 </div>
                 <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                   {transactionData.customerName}
                 </div>
                 <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.customerEmail}
+                  {transactionData.paymentNote || 'N/A'}
                 </div>
                 <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                  {transactionData.amount} INR
+                </div>
+                <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                   {transactionData.customerNumber}
                 </div>
                 <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.paymentNote}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {formatDate(transactionData.createdAt)}
+                  {transactionData.customerEmail}
                 </div>
                 <div 
-                  className="text-sm" 
-                  style={{ 
-                    fontFamily: 'Poppins', 
-                    fontWeight: 500, 
-                    fontSize: '14px', 
-                    lineHeight: '100%', 
-                    letterSpacing: '0%',
-                    color: isTransactionSuccess ? '#4ADE80' : '#F87171'
-                  }}
+                  className={`text-sm font-medium ${isTransactionSuccess ? 'text-green-400' : 'text-red-400'}`}
+                  style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
                 >
                   {transactionData.status.charAt(0).toUpperCase() + transactionData.status.slice(1)}
                 </div>
@@ -223,24 +209,27 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
       )}
 
       {/* Action Buttons */}
-      <div className="mx-4 mb-8">
+      <div className="px-4 mb-8">
         <div className="flex gap-4">
           <button 
             className="flex-1 py-3 px-4 rounded-4xl border-2 border-white text-white"
-            style={{ fontSize: '16px' }}
+            style={{ fontSize: '16px', backgroundColor: 'transparent' }}
             onClick={() => onNavigate ? onNavigate('topup') : router.push('/topup')}
           >
             Top Up Again
           </button>
           <button 
             className="flex-1 py-3 px-4 rounded-4xl text-white"
-            style={{ backgroundColor: '#6B7280', fontSize: '16px' }}
+            style={{ backgroundColor: 'rgb(75, 85, 99)', fontSize: '16px' }}
             onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
           >
             Order History
           </button>
         </div>
       </div>
+
+      {/* Bottom Spacing for Fixed Navigation */}
+      <div className="h-15"></div>
 
       {/* Bottom Navigation */}
       <BottomNavigation />
