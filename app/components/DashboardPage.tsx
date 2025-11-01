@@ -20,7 +20,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, token } = useAppSelector((state) => state.auth);
-  const [isLoading, setIsLoading] = useState(!isAuthenticated);
+  const [isLoading, setIsLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState<{
     walletBalance: number;
     orders: {
@@ -50,19 +50,29 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
+    // Always fetch games (public data)
+    fetchGames();
+    
+    // Only fetch user data if authenticated
     if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchDashboardData();
-      fetchGames();
+    } else {
+      // Set fallback data if not authenticated
+      setDashboardData({
+        walletBalance: 0,
+        orders: {
+          total: 0,
+          completedCount: 0,
+          successAmount: 0
+        },
+        transactions: {
+          total: 0,
+          successfulCount: 0,
+          successAmount: 0
+        }
+      });
     }
   }, [isAuthenticated, token]);
-
-  // Update loading state when authentication changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated]);
 
   const fetchDashboardData = async () => {
     try {
@@ -132,18 +142,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
     { icon: '✈️', label: 'Contact US' }
   ];
 
-  // Only show loading screen if user is not authenticated yet
-  if (isLoading && !isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0 bg-[#232426]">
       {/* Top Section & Welcome Section */}
@@ -189,7 +187,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
                   height={16}
                   className="mr-1"
                 />
-                <span className="font-bold">{isLoading ? '...' : (dashboardData?.walletBalance || 0)}</span>
+                <span className="font-bold">{dashboardData?.walletBalance ?? 0}</span>
                 <span className="font-bold ml-1">+</span>
               </div>
             <div 
@@ -209,7 +207,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
             Welcome,
           </h1>
           <h1 className="text-gray-300 font-bold mb-4 text-2xl sm:text-3xl">
-            {isLoading ? 'Loading...' : (user?.name || 'User')}
+            {user?.name || 'Guest'}
           </h1>
           <button type="button" className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10" style={{ backgroundColor: '#7F8CAA' }}>
             JOIN WHATSAPP CHANNEL

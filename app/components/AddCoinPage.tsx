@@ -14,7 +14,7 @@ interface AddCoinPageProps {
 
 export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
   const router = useRouter();
-  const { token } = useAppSelector((state) => state.auth);
+  const { token, isAuthenticated } = useAppSelector((state) => state.auth);
   const [selectedAmount, setSelectedAmount] = useState<string>('');
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -84,9 +84,15 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
 
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        toast.error('You need to be logged in to add coins');
-        // Let ProtectedRoute handle navigation if needed
+      if (!token || !isAuthenticated) {
+        toast.error('Please login first to add coins');
+        setTimeout(() => {
+          if (onNavigate) {
+            onNavigate('login');
+          } else {
+            router.push('/login');
+          }
+        }, 1500);
         return;
       }
 

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useAppSelector } from '@/lib/hooks/redux';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -15,6 +16,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const router = useRouter();
   const params = useParams();
   const gameId = params?.gameId as string;
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   
   const [gameData, setGameData] = useState<{
     _id: string;
@@ -495,6 +497,20 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                 boxShadow: '0px 4px 4px 0px #00000040'
               }}
               onClick={() => {
+                // Check if user is logged in before proceeding
+                const token = localStorage.getItem('authToken');
+                if (!token || !isAuthenticated) {
+                  toast.error('Please login first to checkout');
+                  setTimeout(() => {
+                    if (onNavigate) {
+                      onNavigate('login');
+                    } else {
+                      router.push('/login');
+                    }
+                  }, 1500);
+                  return;
+                }
+
                 // Validate form data before proceeding
                 if (!formData.playerId.trim()) {
                   toast.error('Please enter your Player ID');

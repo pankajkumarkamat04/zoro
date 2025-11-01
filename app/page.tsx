@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DesktopLandingPage from './components/DesktopLandingPage';
-import LoginPage from './components/LoginPage';
+import { useRouter } from 'next/navigation';
+import DashboardPage from './components/DashboardPage';
 
 export default function Home() {
-  const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -15,6 +16,11 @@ export default function Home() {
       const isMobileDevice = mobileRegex.test(userAgent) || window.innerWidth <= 768;
       setIsMobile(isMobileDevice);
       setIsLoading(false);
+      
+      // Only redirect to desktop if NOT on mobile
+      if (!isMobileDevice) {
+        router.push('/desktop');
+      }
     };
 
     checkIfMobile();
@@ -23,7 +29,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', checkIfMobile);
     };
-  }, []);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -33,11 +39,11 @@ export default function Home() {
     );
   }
 
-  // Show login page directly for mobile users
+  // Show dashboard on mobile, redirect happens on desktop
   if (isMobile) {
-    return <LoginPage />;
+    return <DashboardPage />;
   }
 
-  // Show desktop landing page for desktop users
-  return <DesktopLandingPage />;
+  // Desktop redirect in progress
+  return null;
 }
