@@ -103,6 +103,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, onNavigate }) => {
   };
 
   const handleMenuItemClick = (path: string) => {
+    // Special handling for WhatsApp Us
+    if (path === '/contact') {
+      onClose();
+      window.open('https://wa.me/9863796664', '_blank');
+      return;
+    }
+    
     const screenName = getScreenName(path);
     onClose();
     if (onNavigate) {

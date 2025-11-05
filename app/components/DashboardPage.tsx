@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaWhatsapp } from 'react-icons/fa';
 import { GiShoppingBag } from 'react-icons/gi';
 import { MdBarChart } from 'react-icons/md';
 import { BsFillSendFill } from 'react-icons/bs';
@@ -139,7 +139,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
     { icon: '➕', label: 'Add coins' },
     { icon: '🛍️', label: 'Orders' },
     { icon: '📊', label: 'Leaderboard' },
-    { icon: '✈️', label: 'Contact US' }
+    { icon: '✈️', label: 'Whatsapp Us' }
   ];
 
   return (
@@ -176,27 +176,39 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
 
           {/* User Profile & Balance */}
           <div className="flex items-center space-x-2">
-              <div 
-                className="flex items-center rounded-full px-3 py-1 cursor-pointer bg-[#232426] text-[14px] border border-[#7F8CAA]"
-                onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
-              >
-                <Image
-                  src="/coin.png"
-                  alt="Coin"
-                  width={26}
-                  height={16}
-                  className="mr-1"
-                />
-                <span className="font-bold">{dashboardData?.walletBalance ?? 0}</span>
-                <span className="font-bold ml-1">+</span>
-              </div>
+              {isAuthenticated && (
+                <div 
+                  className="flex items-center rounded-full px-3 py-1 cursor-pointer bg-[#232426] text-[14px] border border-[#7F8CAA]"
+                  onClick={() => onNavigate ? onNavigate('addcoin') : router.push('/addcoin')}
+                >
+                  <Image
+                    src="/coin.png"
+                    alt="Coin"
+                    width={26}
+                    height={16}
+                    className="mr-1"
+                  />
+                  <span className="font-bold">{dashboardData?.walletBalance ?? 0}</span>
+                  <span className="font-bold ml-1">+</span>
+                </div>
+              )}
             <div 
-              className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer overflow-hidden"
               onClick={() => onNavigate ? onNavigate('profile') : router.push('/profile')}
             >
-              <svg className="w-7 h-7 text-[#232426]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
+              {user?.profilePicture ? (
+                <Image
+                  src={user.profilePicture}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <svg className="w-7 h-7 text-[#232426]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
            </div>
          </div>
@@ -209,9 +221,15 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           <h1 className="text-gray-300 font-bold mb-4 text-2xl sm:text-3xl">
             {user?.name || 'Guest'}
           </h1>
-          <button type="button" className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10" style={{ backgroundColor: '#7F8CAA' }}>
+          <a 
+            href="https://whatsapp.com/channel/0029Vb79aVLGehEGjJqCE82P" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="py-2 px-4 rounded-xl text-white font-bold text-sm mb-4 relative z-10 inline-block" 
+            style={{ backgroundColor: '#7F8CAA' }}
+          >
             JOIN WHATSAPP CHANNEL
-          </button>
+          </a>
           
           {/* Character Image */}
           <div className="absolute top-0 opacity-60 z-0" style={{ right: '-200px' }}>
@@ -299,10 +317,10 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
           <span className="text-white text-xs text-center">Leaderboard</span>
         </div>
 
-        {/* Contact US */}
+        {/* Whatsapp Us */}
         <div 
           className="flex flex-col items-center cursor-pointer"
-          onClick={() => onNavigate ? onNavigate('contact') : router.push('/contact')}
+          onClick={() => window.open('https://wa.me/9863796664', '_blank')}
         >
           <div 
             className="md:w-16 md:h-16 w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2"
@@ -312,9 +330,9 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
               boxShadow: 'rgb(127, 140, 177) 0px 8px 12px'
             }}
           >
-            <BsFillSendFill className="text-2xl" style={{ color: '#7F8CAA' }} />
+            <FaWhatsapp className="text-2xl" style={{ color: '#7F8CAA' }} />
           </div>
-          <span className="text-white text-xs text-center">Contact US</span>
+          <span className="text-white text-xs text-center">Whatsapp Us</span>
         </div>
       </div>
 

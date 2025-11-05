@@ -150,7 +150,7 @@ interface PaymentTransaction {
 
 export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps = {}) {
   const router = useRouter();
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token, user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState<'orders' | 'wallet' | 'payment'>('orders');
   const [orderData, setOrderData] = useState<OrderHistoryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(!isAuthenticated);
@@ -163,7 +163,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedWalletTransaction, setSelectedWalletTransaction] = useState<WalletTransaction | null>(null);
   const [showWalletDetails, setShowWalletDetails] = useState(false);
-  const [walletBalance, setWalletBalance] = useState<number>(1250);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
   const [walletPagination, setWalletPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
@@ -202,6 +202,41 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       setIsLoading(false);
     }
   }, [isAuthenticated]);
+
+  // Fetch wallet balance from dashboard API or use user's walletBalance
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      // First, try to use user's walletBalance from auth state
+      if (user?.walletBalance !== undefined) {
+        setWalletBalance(user.walletBalance);
+      }
+      
+      // Also fetch dashboard data to get the latest balance
+      const fetchDashboardBalance = async () => {
+        try {
+          const response = await fetch('https://api.leafstore.in/api/v1/user/dashboard', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const responseData = await response.json();
+            if (responseData.data?.walletBalance !== undefined) {
+              setWalletBalance(responseData.data.walletBalance);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching wallet balance:', error);
+          // If fetch fails, keep using user's walletBalance if available
+        }
+      };
+
+      fetchDashboardBalance();
+    }
+  }, [isAuthenticated, token, user]);
 
   // Prevent body scroll when popup is open
   useEffect(() => {
