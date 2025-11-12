@@ -25,6 +25,10 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     productId: string;
     publisher: string;
     validationFields: string[];
+    regionList?: Array<{
+      code: string;
+      name: string;
+    }>;
     createdAt: string;
     updatedAt: string;
     __v: number;
@@ -45,10 +49,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   
   const [isLoading, setIsLoading] = useState(true);
   const [isValidating, setIsValidating] = useState(false);
-  const [formData, setFormData] = useState({
-    playerId: '',
-    serverId: ''
-  });
+  const [formData, setFormData] = useState<Record<string, string>>({});
   const [validatedInfo, setValidatedInfo] = useState<{
     nickname: string;
     server: string;
@@ -67,6 +68,17 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
+
+  // Initialize formData when gameData is loaded
+  useEffect(() => {
+    if (gameData && gameData.validationFields) {
+      const initialFormData: Record<string, string> = {};
+      gameData.validationFields.forEach((field) => {
+        initialFormData[field] = '';
+      });
+      setFormData(initialFormData);
+    }
+  }, [gameData]);
 
   useEffect(() => {
     if (showCheckoutPopup) {
@@ -128,16 +140,22 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         return;
       }
 
-      const requestBody = {
+      // Build request body dynamically based on validationFields
+      const requestBody: any = {
         diamondPackId: selectedPackData.packId,
-        playerId: selectedPackData.playerId,
-        server: selectedPackData.serverId,
         amount: selectedPackData.packAmount,
         quantity: 1,
         redirectUrl: typeof window !== 'undefined' 
           ? `${window.location.origin}/payment-status`
           : 'https://leafstore.in/payment-status'
       };
+
+      // Add all validation fields dynamically
+      if (gameData && gameData.validationFields) {
+        gameData.validationFields.forEach((field) => {
+          requestBody[field] = selectedPackData[field];
+        });
+      }
 
       const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
         method: 'POST',
@@ -183,12 +201,18 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         return;
       }
 
-      const requestBody = {
+      // Build request body dynamically based on validationFields
+      const requestBody: any = {
         diamondPackId: selectedPackData.packId,
-        playerId: selectedPackData.playerId,
-        server: selectedPackData.serverId,
         quantity: 1
       };
+
+      // Add all validation fields dynamically
+      if (gameData && gameData.validationFields) {
+        gameData.validationFields.forEach((field) => {
+          requestBody[field] = selectedPackData[field];
+        });
+      }
 
       const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack', {
         method: 'POST',
@@ -262,30 +286,77 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
     }));
   };
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Helper function to format field names to user-friendly labels
+  const getFieldLabel = (fieldName: string): string => {
+    const labelMap: Record<string, string> = {
+      playerId: 'Player ID',
+      server: 'Server',
+      serverId: 'Server ID',
+      uid: 'UID',
+      username: 'Username',
+      accountId: 'Account ID',
+      characterName: 'Character Name',
+    };
+    
+    // If we have a mapping, use it
+    if (labelMap[fieldName]) {
+      return labelMap[fieldName];
+    }
+    
+    // Otherwise, format the field name (e.g., "playerId" -> "Player ID")
+    return fieldName
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
+  // Helper function to get placeholder text
+  const getFieldPlaceholder = (fieldName: string): string => {
+    return `Enter your ${getFieldLabel(fieldName)}`;
+  };
+
   const handleValidate = async () => {
-    // Validation
-    if (!formData.playerId.trim()) {
-      toast.error('Please enter your Player ID');
+    // Dynamic validation - check all required fields
+    if (!gameData || !gameData.validationFields) {
+      toast.error('Game data not loaded');
       return;
     }
-    if (!formData.serverId.trim()) {
-      toast.error('Please enter your Server ID');
-      return;
+
+    for (const field of gameData.validationFields) {
+      if (!formData[field] || !formData[field].trim()) {
+        toast.error(`Please enter your ${getFieldLabel(field)}`);
+        return;
+      }
     }
 
     setIsValidating(true);
 
     try {
+      // Build request body dynamically based on validationFields
+      const requestBody: Record<string, string> = {
+        gameId: gameId,
+      };
+      
+      gameData.validationFields.forEach((field) => {
+        if (formData[field]) {
+          requestBody[field] = formData[field];
+        }
+      });
+
       const response = await fetch(`https://api.leafstore.in/api/v1/games/validate-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          gameId: gameId,
-          playerId: formData.playerId,
-          serverId: formData.serverId
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -395,34 +466,52 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
             </div>
           </div>
 
-          {/* Input Fields */}
+          {/* Input Fields - Dynamic based on validationFields */}
           <div className="space-y-4">
-            <div>
-              <label htmlFor="topup-uid" className="text-white text-sm mb-2 block">Enter Your UID</label>
-              <input
-                type="text"
-                name="playerId"
-                id="topup-uid"
-                value={formData.playerId}
-                onChange={handleInputChange}
-                placeholder="Enter your UID"
-                className="w-full px-4 py-2 rounded-lg text-black placeholder-gray-500"
-                style={{ backgroundColor: '#D9D9D9' }}
-              />
-            </div>
-            <div>
-              <label htmlFor="topup-server" className="text-white text-sm mb-2 block">Enter Your Server ID</label>
-              <input
-                type="text"
-                name="serverId"
-                id="topup-server"
-                value={formData.serverId}
-                onChange={handleInputChange}
-                placeholder="Enter your Server ID"
-                className="w-full px-4 py-2 rounded-lg text-black placeholder-gray-500"
-                style={{ backgroundColor: '#D9D9D9' }}
-              />
-            </div>
+            {gameData.validationFields && gameData.validationFields.map((field, index) => {
+              // Check if this is a server field and regionList is available
+              const isServerField = (field === 'server' || field === 'serverId');
+              const shouldUseDropdown = isServerField && gameData.regionList && gameData.regionList.length > 0;
+
+              return (
+                <div key={field}>
+                  <label 
+                    htmlFor={`topup-${field}`} 
+                    className="text-white text-sm mb-2 block"
+                  >
+                    Enter Your {getFieldLabel(field)}
+                  </label>
+                  {shouldUseDropdown && gameData.regionList ? (
+                    <select
+                      name={field}
+                      id={`topup-${field}`}
+                      value={formData[field] || ''}
+                      onChange={handleSelectChange}
+                      className="w-full px-4 py-2 rounded-lg text-black"
+                      style={{ backgroundColor: '#D9D9D9' }}
+                    >
+                      <option value="">Select {getFieldLabel(field)}</option>
+                      {gameData.regionList.map((region) => (
+                        <option key={region.code} value={region.code}>
+                          {region.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      name={field}
+                      id={`topup-${field}`}
+                      value={formData[field] || ''}
+                      onChange={handleInputChange}
+                      placeholder={getFieldPlaceholder(field)}
+                      className="w-full px-4 py-2 rounded-lg text-black placeholder-gray-500"
+                      style={{ backgroundColor: '#D9D9D9' }}
+                    />
+                  )}
+                </div>
+              );
+            })}
             <div className="flex justify-center">
               <button
                 type="button"
@@ -511,19 +600,21 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   return;
                 }
 
-                // Validate form data before proceeding
-                if (!formData.playerId.trim()) {
-                  toast.error('Please enter your Player ID');
-                  return;
-                }
-                
-                if (!formData.serverId.trim()) {
-                  toast.error('Please enter your Server ID');
+                // Validate form data before proceeding - dynamic validation
+                if (!gameData || !gameData.validationFields) {
+                  toast.error('Game data not loaded');
                   return;
                 }
 
-                // Store pack details for checkout popup
-                const packDetails = {
+                for (const field of gameData.validationFields) {
+                  if (!formData[field] || !formData[field].trim()) {
+                    toast.error(`Please enter your ${getFieldLabel(field)}`);
+                    return;
+                  }
+                }
+
+                // Store pack details for checkout popup - include all validation fields
+                const packDetails: any = {
                   packId: pack._id,
                   gameId: gameId,
                   gameName: gameData?.name,
@@ -532,9 +623,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   packAmount: pack.amount,
                   packLogo: pack.logo,
                   packCategory: pack.category,
-                  playerId: formData.playerId,
-                  serverId: formData.serverId
                 };
+
+                // Add all validation fields dynamically
+                gameData.validationFields.forEach((field) => {
+                  packDetails[field] = formData[field];
+                });
                 localStorage.setItem('selectedPack', JSON.stringify(packDetails));
                 setSelectedPackData(packDetails);
                 setShowCheckoutPopup(true);

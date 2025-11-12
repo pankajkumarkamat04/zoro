@@ -83,16 +83,23 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         return;
       }
 
-      const requestBody = {
+      // Build request body dynamically - include all validation fields from packDetails
+      const requestBody: any = {
         diamondPackId: packDetails.packId,
-        playerId: packDetails.playerId,
-        server: packDetails.serverId,
         amount: packDetails.packAmount,
         quantity: 1,
         redirectUrl: typeof window !== 'undefined' 
           ? `${window.location.origin}/payment-status`
           : 'https://leafstore.in/payment-status'
       };
+
+      // Add all validation fields dynamically (exclude standard pack fields)
+      const standardFields = ['packId', 'gameId', 'gameName', 'gameImage', 'packDescription', 'packAmount', 'packLogo', 'packCategory'];
+      Object.keys(packDetails).forEach((key) => {
+        if (!standardFields.includes(key)) {
+          requestBody[key] = packDetails[key];
+        }
+      });
 
       const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
         method: 'POST',
@@ -139,12 +146,19 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         return;
       }
 
-      const requestBody = {
+      // Build request body dynamically - include all validation fields from packDetails
+      const requestBody: any = {
         diamondPackId: packDetails.packId,
-        playerId: packDetails.playerId,
-        server: packDetails.serverId,
         quantity: 1
       };
+
+      // Add all validation fields dynamically (exclude standard pack fields)
+      const standardFields = ['packId', 'gameId', 'gameName', 'gameImage', 'packDescription', 'packAmount', 'packLogo', 'packCategory'];
+      Object.keys(packDetails).forEach((key) => {
+        if (!standardFields.includes(key)) {
+          requestBody[key] = packDetails[key];
+        }
+      });
 
       const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack', {
         method: 'POST',
