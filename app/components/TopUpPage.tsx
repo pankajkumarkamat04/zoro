@@ -347,7 +347,21 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       
       gameData.validationFields.forEach((field) => {
         if (formData[field]) {
-          requestBody[field] = formData[field];
+          // If this is a server field and regionList is available, ensure we're using the region code
+          const isServerField = (field === 'server' || field === 'serverId');
+          if (isServerField && gameData.regionList && gameData.regionList.length > 0) {
+            // The formData already contains the region code from the dropdown
+            // Verify it's a valid region code from the regionList
+            const selectedRegion = gameData.regionList.find(region => region.code === formData[field]);
+            if (selectedRegion) {
+              requestBody[field] = selectedRegion.code;
+            } else {
+              // If it's not a valid region code, use the value as-is (might be manual input)
+              requestBody[field] = formData[field];
+            }
+          } else {
+            requestBody[field] = formData[field];
+          }
         }
       });
 

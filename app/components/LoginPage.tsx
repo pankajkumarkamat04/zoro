@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -18,6 +18,30 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  // Handle browser back button - prevent navigation outside app
+  useEffect(() => {
+    // Push a state to the history stack to prevent going back outside
+    window.history.pushState(null, '', window.location.href);
+    
+    const handlePopState = () => {
+      // Push another state to prevent going back
+      window.history.pushState(null, '', window.location.href);
+      // Navigate to dashboard instead of going back outside
+      if (onNavigate) {
+        onNavigate('home');
+      } else {
+        router.push('/dashboard');
+      }
+    };
+
+    // Listen for popstate event (browser back button)
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [router, onNavigate]);
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -69,6 +93,35 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-16 sm:pt-20 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+      {/* Back Button */}
+      <div className="w-full max-w-sm mb-4">
+        <button
+          type="button"
+          onClick={() => {
+            if (onNavigate) {
+              onNavigate('home');
+            } else {
+              router.push('/dashboard');
+            }
+          }}
+          className="flex items-center cursor-pointer"
+          style={{
+            color: '#7F8CAA',
+            fontFamily: 'Poppins',
+            fontWeight: 700,
+            fontStyle: 'normal',
+            fontSize: '16px',
+            lineHeight: '100%',
+            letterSpacing: '0%'
+          }}
+        >
+          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          go back
+        </button>
+      </div>
+
       {/* Logo */}
       <div className="">
         <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
