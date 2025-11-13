@@ -375,21 +375,30 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
       if (response.ok) {
         const responseData = await response.json();
-        if (responseData.response) {
-          toast.success('User validated successfully!');
-          if (responseData.data) {
-            setValidatedInfo({
-              nickname: responseData.data.nickname,
-              server: responseData.data.server
-            });
-          }
+        // Check for success using response or valid field
+        if (responseData.response || responseData.valid) {
+          // Show success message from response
+          const successMsg = responseData.msg || responseData.data?.msg || 'User validated successfully!';
+          toast.success(successMsg);
+          
+          // Set validated info - use top level fields or data fields
+          const nickname = responseData.name || responseData.data?.nickname || '';
+          const server = responseData.server || responseData.data?.server || '';
+          
+          setValidatedInfo({
+            nickname: nickname,
+            server: server
+          });
         } else {
-          toast.error(responseData.data?.msg || 'Invalid ID or Server');
+          // Show error message
+          const errorMsg = responseData.msg || responseData.data?.msg || 'Invalid ID or Server';
+          toast.error(errorMsg);
           setValidatedInfo(null);
         }
       } else {
         const errorData = await response.json();
-        toast.error(errorData.data?.msg || 'Validation failed. Please try again.');
+        const errorMsg = errorData.msg || errorData.data?.msg || 'Validation failed. Please try again.';
+        toast.error(errorMsg);
         setValidatedInfo(null);
       }
     } catch (error) {
