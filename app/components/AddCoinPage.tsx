@@ -130,13 +130,15 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Balance Card */}
-      <div className="px-4 mb-6">
+        {/* Balance Card */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <div 
           className="flex items-center justify-between p-4 rounded-2xl"
           style={{ 
@@ -174,13 +176,13 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
         </div>
       </div>
 
-      {/* Coin Packs Section */}
-      <div className="px-4 mb-6">
+        {/* Coin Packs Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
               <h2 className="text-white font-bold mb-4 text-xl sm:text-2xl">
                 Coin Packs
               </h2>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
           {coinPacks.map((pack, index) => (
             <div 
               key={index}
@@ -220,8 +222,8 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
         </div>
       </div>
 
-      {/* Custom Amount Section */}
-      <div className="px-4 mb-8">
+        {/* Custom Amount Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="space-y-3">
           <input 
             type="number" 
@@ -252,11 +254,12 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
         </div>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

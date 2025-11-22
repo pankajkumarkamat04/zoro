@@ -442,21 +442,23 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Color Effect */}
-      <div
-        className="absolute top-0 left-0 right-0 h-32 z-0"
-        style={{
-          background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
-        }}
-      />
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Color Effect */}
+        <div
+          className="absolute top-0 left-0 right-0 h-32 z-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
+          }}
+        />
 
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Game Information & Input Card */}
-      <div className="px-4 mb-6">
+        {/* Game Information & Input Card */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
          <div
            className="p-6"
            style={{
@@ -571,8 +573,8 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         </div>
       </div>
 
-      {/* Select Diamond Pack Section */}
-      <div className="px-4 mb-6">
+        {/* Select Diamond Pack Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
         {/* Filter Buttons */}
@@ -598,7 +600,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         )}
 
          {/* Diamond Pack Cards */}
-         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
           {filteredDiamondPacks.map((pack, index) => (
             <div
               key={pack._id}
@@ -693,11 +695,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         </div>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
 
       {/* Checkout Popup */}
       {showCheckoutPopup && selectedPackData && (

@@ -16,7 +16,7 @@ export default function BottomNavigation({ onNavigate }: BottomNavigationProps =
   return (
     <nav 
       aria-label="Bottom Navigation"
-      className="fixed p-3 sm:p-4 z-40 left-4 right-4 sm:left-8 sm:right-8"
+      className="fixed p-3 sm:p-4 z-40 left-4 right-4 sm:left-8 sm:right-8 md:left-1/2 md:-translate-x-1/2 md:max-w-2xl"
       style={{
         backgroundColor: 'rgb(30, 30, 30)',
         bottom: '10px',

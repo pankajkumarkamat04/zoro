@@ -110,13 +110,15 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Status Section */}
-      <div className="flex flex-col items-center py-6">
+        {/* Status Section */}
+        <div className="flex flex-col items-center py-6">
         {/* Status Icon */}
         <div 
           className="rounded-full flex items-center justify-center mb-4"
@@ -147,9 +149,9 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
         </h1>
       </div>
 
-      {/* Transaction Details Card */}
-      {transactionData && (
-        <div className="px-4 mb-6">
+        {/* Transaction Details Card */}
+        {transactionData && (
+          <div className="px-4 md:px-6 lg:px-8 mb-6">
           <div 
             className="p-4 rounded-lg"
             style={{ 
@@ -208,8 +210,8 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="px-4 mb-8">
+        {/* Action Buttons */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="flex gap-4">
           <button 
             className="flex-1 py-3 px-4 rounded-4xl border-2 border-white text-white"
@@ -228,11 +230,12 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
         </div>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 };

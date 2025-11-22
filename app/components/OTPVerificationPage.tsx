@@ -262,9 +262,10 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
         </button>
       </div>
 
-      {/* Faded Circles */}
-      <FadedCircle top="-50px" left="200px" />
-      <FadedCircle bottom="-50px" right="200px" />
+        {/* Faded Circles */}
+        <FadedCircle top="-50px" left="200px" />
+        <FadedCircle bottom="-50px" right="200px" />
+      </div>
     </div>
   );
 }

@@ -504,13 +504,15 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Tabs */}
-      <div className="px-4 mb-4">
+        {/* Tabs */}
+        <div className="px-4 md:px-6 lg:px-8 mb-4">
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('orders')}
@@ -559,7 +561,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Page Title */}
       {activeTab === 'orders' && (
-        <div className="px-4 mb-4">
+        <div className="px-4 md:px-6 lg:px-8 mb-4">
           <h1 className="text-white font-bold text-xl sm:text-2xl">History</h1>
           {orderData?.pagination && (
             <p className="text-gray-400 text-sm mt-2">
@@ -571,7 +573,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Balance Card for Wallet Tab */}
       {activeTab === 'wallet' && (
-        <div className="px-4 mb-6">
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
           <div 
             className="flex items-center justify-between p-4 rounded-2xl"
             style={{ 
@@ -612,7 +614,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Search and Filter Section - Styled like reference */}
       {activeTab === 'orders' && (
-        <div className="px-4 mb-6" role="search">
+        <div className="px-4 md:px-6 lg:px-8 mb-6" role="search">
           {/* Row 1: Search by Order ID + icon button */}
           <div className="flex items-center">
             <input 
@@ -686,7 +688,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
       {/* Payment History Filters */}
       {activeTab === 'payment' && (
-        <div className="px-4 mb-6" role="search">
+        <div className="px-4 md:px-6 lg:px-8 mb-6" role="search">
           {/* Row 1: Search by Transaction ID + icon button */}
           <div className="flex items-center">
             <input 
@@ -752,7 +754,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       )}
 
       {/* Tab Content */}
-      <div className="px-4 mb-8">
+      <div className="px-4 md:px-6 lg:px-8 mb-8">
         {activeTab === 'orders' && (
           <div className="space-y-4">
             {orderData?.orders?.length === 0 ? (
@@ -1135,16 +1137,17 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
         </>
       )}
 
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
+        <style jsx>{`
+          @keyframes slideUp {
+            from {
+              transform: translateY(100%);
+            }
+            to {
+              transform: translateY(0);
+            }
           }
-          to {
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+        `}</style>
+      </div>
     </div>
   );
 }

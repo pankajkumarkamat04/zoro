@@ -144,8 +144,10 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0 bg-[#232426]">
-      {/* Top Section & Welcome Section */}
-      <div className="px-4 relative">
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section & Welcome Section */}
+        <div className="px-4 md:px-6 lg:px-8 relative">
         {/* Top Color Effect */}
         <div className="absolute top-0 left-0 right-0 h-32 z-0 bg-linear-to-b from-[rgba(127,140,170,0.3)] to-transparent" />
         
@@ -357,7 +359,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
         </div>
 
         {/* Games Grid */}
-        <div className="grid grid-cols-3 gap-3 relative z-10">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4 relative z-10">
           {gamesLoading ? (
             // Loading skeleton for games
             Array.from({ length: 6 }).map((_, index) => (
@@ -446,14 +448,15 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
-      
-      {/* Bottom spacing for navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+        
+        {/* Bottom spacing for navigation */}
+        <div className="h-15"></div>
 
-      {/* Side Menu */}
-      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} onNavigate={onNavigate} />
+        {/* Side Menu */}
+        <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} onNavigate={onNavigate} />
+      </div>
     </div>
 
   );

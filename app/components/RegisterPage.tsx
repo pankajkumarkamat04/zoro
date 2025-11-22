@@ -166,6 +166,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-10 sm:pt-12 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+      {/* Desktop Container */}
+      <div className="w-full max-w-md lg:max-w-lg">
       {/* Logo */}
       <div className="mb-8 relative z-10">
         <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 flex items-center justify-center">
@@ -335,8 +337,9 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
         </div>
       </div>
 
-      {/* Faded Circle */}
-      <FadedCircle top="-60px" />
+        {/* Faded Circle */}
+        <FadedCircle top="-60px" />
+      </div>
     </div>
   );
 }

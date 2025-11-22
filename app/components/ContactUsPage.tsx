@@ -43,13 +43,15 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Page Title */}
-      <div>
+        {/* Page Title */}
+        <div>
         <h1 
           className="text-white font-bold text-2xl sm:text-3xl text-center"
         >
@@ -57,8 +59,8 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
         </h1>
       </div>
 
-      {/* Illustration Section */}
-      <div className="px-4 mb-8">
+        {/* Illustration Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="flex flex-col items-center">
           {/* Main Illustration */}
           <div className="relative">
@@ -87,8 +89,8 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
         </div>
       </div>
 
-      {/* Contact Form Section */}
-      <div className="px-4 mb-8">
+        {/* Contact Form Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div 
           className="p-3 rounded-2xl"
           style={{ 
@@ -180,11 +182,12 @@ export default function ContactUsPage({ onNavigate }: ContactUsPageProps) {
         </div>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

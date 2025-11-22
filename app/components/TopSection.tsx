@@ -18,7 +18,7 @@ export default function TopSection({
 
   if (showLogo) {
     return (
-      <div className="px-4 relative">
+      <div className="px-4 md:px-6 lg:px-8 relative">
         {/* Top Color Effect */}
         <div 
           className="absolute top-0 left-0 right-0 h-24 sm:h-32 z-0"

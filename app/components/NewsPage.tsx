@@ -209,13 +209,15 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Back Button */}
-      <div className="px-4 mb-4">
+        {/* Back Button */}
+        <div className="px-4 md:px-6 lg:px-8 mb-4">
         <button
           onClick={() => {
             if (onNavigate) {
@@ -242,14 +244,14 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
         </button>
       </div>
 
-      {/* Page Title */}
-      <div className="px-4 mb-6">
+        {/* Page Title */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h1 className="text-white font-bold text-xl sm:text-2xl">News & Announcements</h1>
         <p className="text-gray-400 text-sm mt-2">Stay updated with the latest news, updates and promotions</p>
       </div>
 
-      {/* News Content */}
-      <div className="px-4 pb-24">
+        {/* News Content */}
+        <div className="px-4 md:px-6 lg:px-8 pb-24">
         {sortedNews.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-white text-lg mb-2">No news available</div>
@@ -316,11 +318,12 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
         )}
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

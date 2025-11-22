@@ -244,8 +244,8 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         <TopSection showLogo={true} />
       </div>
 
-      {/* Go Back Link */}
-      <div className="px-4 mb-4">
+        {/* Go Back Link */}
+        <div className="px-4 md:px-6 lg:px-8 mb-4">
         <button 
           type="button"
           className="cursor-pointer"
@@ -260,8 +260,8 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         </button>
       </div>
 
-      {/* Welcome Section */}
-      <div className="px-4 mb-6">
+        {/* Welcome Section */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h1 
           className="text-white font-bold text-xl sm:text-2xl"
           style={{ fontSize: '24px' }}
@@ -270,8 +270,8 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         </h1>
       </div>
 
-      {/* User Profile Card */}
-      <div className="px-4 mb-6">
+        {/* User Profile Card */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <div 
           className="p-6 rounded-2xl"
           style={{ 
@@ -608,11 +608,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         </div>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

@@ -115,21 +115,23 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Page Title */}
-      <div className="px-4 mb-6">
+        {/* Page Title */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h1 className="text-white font-bold text-xl sm:text-2xl">Leaderboards</h1>
         {leaderboardData?.currentMonth?.month && (
           <p className="text-gray-400 text-sm mt-2">{leaderboardData.currentMonth.month}</p>
         )}
       </div>
 
-      {/* Top 3 Players */}
-      <div className="px-4 mb-8">
+        {/* Top 3 Players */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="flex justify-center items-end space-x-3 sm:space-x-4">
           {/* Rank #2 */}
           <div className="flex flex-col items-center">
@@ -265,8 +267,8 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
         </div>
       </div>
 
-      {/* Ranked List */}
-      <div className="px-4 mb-8">
+        {/* Ranked List */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="space-y-3">
           {rankedPlayers.map((player, index) => (
             <div
@@ -324,8 +326,9 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

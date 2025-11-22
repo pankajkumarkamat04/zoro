@@ -196,13 +196,15 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
   
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Top Section with Logo */}
-      <div className="relative z-10">
-        <TopSection showLogo={true} />
-      </div>
+      {/* Desktop Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Top Section with Logo */}
+        <div className="relative z-10">
+          <TopSection showLogo={true} />
+        </div>
 
-      {/* Back Button */}
-      <div className="px-4 mb-4">
+        {/* Back Button */}
+        <div className="px-4 md:px-6 lg:px-8 mb-4">
         <button
           type="button"
           className="flex items-center cursor-pointer"
@@ -235,13 +237,13 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         </button>
       </div>
 
-      {/* Page Title */}
-      <div className="px-4 mb-6">
+        {/* Page Title */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h1 className="text-white font-bold text-xl sm:text-2xl">Payment Methods</h1>
       </div>
 
-      {/* Payment Summary - Order-style box */}
-      <div className="px-4 mb-6">
+        {/* Payment Summary - Order-style box */}
+        <div className="px-4 md:px-6 lg:px-8 mb-6">
         <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040' }}>
           <div className="flex">
             <div className="space-y-3" style={{ width: '120px' }}>
@@ -261,8 +263,8 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         </div>
       </div>
 
-      {/* Payment Options */}
-      <div className="px-4 mb-8">
+        {/* Payment Options */}
+        <div className="px-4 md:px-6 lg:px-8 mb-8">
         <div className="space-y-4">
           {/* CRED Coins Option - Order-style box */}
           <div
@@ -320,8 +322,8 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         </div>
       </div>
 
-      {/* Pay Securely Button */}
-      <div className="px-4 mt-8 sm:mt-10 mb-8 flex justify-center">
+        {/* Pay Securely Button */}
+        <div className="px-4 md:px-6 lg:px-8 mt-8 sm:mt-10 mb-8 flex justify-center">
         <button
           type="button"
           className="w-full max-w-sm py-3 sm:py-4 rounded-4xl text-white font-bold text-base sm:text-lg flex items-center justify-center cursor-pointer"
@@ -371,11 +373,12 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         </button>
       </div>
 
-      {/* Bottom Spacing for Fixed Navigation */}
-      <div className="h-15"></div>
+        {/* Bottom Spacing for Fixed Navigation */}
+        <div className="h-15"></div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

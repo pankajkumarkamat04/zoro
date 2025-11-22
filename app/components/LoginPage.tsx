@@ -93,8 +93,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-16 sm:pt-20 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
-      {/* Back Button */}
-      <div className="w-full max-w-sm mb-4">
+      {/* Desktop Container */}
+      <div className="w-full max-w-md lg:max-w-lg">
+        {/* Back Button */}
+        <div className="w-full mb-4">
         <button
           type="button"
           onClick={() => {
@@ -213,8 +215,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         </button>
       </div>
 
-      {/* Faded Circle */}
-      <FadedCircle top="1000px" />
+        {/* Faded Circle */}
+        <FadedCircle top="1000px" />
+      </div>
     </div>
   );
 }
