@@ -159,6 +159,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [error, setError] = useState<string | null>(null);
   const [searchOrderId, setSearchOrderId] = useState('');
   const [searchDate, setSearchDate] = useState('');
+  const [searchDateTo, setSearchDateTo] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -175,6 +176,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [paymentPagination, setPaymentPagination] = useState({ currentPage: 1, totalPages: 0, totalTransactions: 0, hasNextPage: false, hasPrevPage: false });
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
+  const dateToInputRef = useRef<HTMLInputElement | null>(null);
   const paymentDateInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -262,6 +264,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       // Add optional parameters if they have values
       if (searchDate) {
         queryParams.append('dateFrom', searchDate);
+      }
+      if (searchDateTo) {
+        queryParams.append('dateTo', searchDateTo);
       }
       if (searchOrderId) {
         queryParams.append('orderId', searchOrderId);
@@ -605,11 +610,11 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
             </button>
           </div>
 
-          {/* Row 2: Calendar button + date input + search button */}
-          <div className="mt-3 flex items-center">
+          {/* Row 2: Calendar button + date inputs (From and To) + search button */}
+          <div className="mt-3 flex items-center gap-2">
             <button
               type="button"
-              aria-label="open calendar"
+              aria-label="open calendar for start date"
               onClick={() => {
                 try {
                   // @ts-ignore - showPicker not in TS lib yet for all targets
@@ -623,7 +628,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                   dateInputRef.current?.focus();
                 }
               }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center shrink-0"
               style={{ width: '36px', height: '36px', borderRadius: '8px'}}
             >
               <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -633,16 +638,50 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
             <input 
               ref={dateInputRef}
               type="date" 
-              placeholder="dd-mm-yyyy"
-              aria-label="filter by date"
-              className="flex-1 ml-2 px-4 py-3 rounded-2xl text-black placeholder-gray-500"
+              placeholder="From date"
+              aria-label="filter by date from"
+              className="flex-1 px-4 py-3 rounded-2xl text-black placeholder-gray-500"
               style={{ backgroundColor: '#D9D9D9' }}
               value={searchDate}
               onChange={(e) => setSearchDate(e.target.value)}
             />
+            <span className="text-white text-sm shrink-0">to</span>
+            <button
+              type="button"
+              aria-label="open calendar for end date"
+              onClick={() => {
+                try {
+                  // @ts-ignore - showPicker not in TS lib yet for all targets
+                  if (dateToInputRef.current && dateToInputRef.current.showPicker) {
+                    // @ts-ignore
+                    dateToInputRef.current.showPicker();
+                  } else {
+                    dateToInputRef.current?.focus();
+                  }
+                } catch {
+                  dateToInputRef.current?.focus();
+                }
+              }}
+              className="flex items-center justify-center shrink-0"
+              style={{ width: '36px', height: '36px', borderRadius: '8px'}}
+            >
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <input 
+              ref={dateToInputRef}
+              type="date" 
+              placeholder="To date"
+              aria-label="filter by date to"
+              className="flex-1 px-4 py-3 rounded-2xl text-black placeholder-gray-500"
+              style={{ backgroundColor: '#D9D9D9' }}
+              value={searchDateTo}
+              onChange={(e) => setSearchDateTo(e.target.value)}
+            />
             <button 
               type="button"
-              className="ml-2 px-5 py-2 rounded-2xl text-white font-medium"
+              className="ml-2 px-5 py-2 rounded-2xl text-white font-medium shrink-0"
               style={{ backgroundColor: 'rgb(35, 36, 38)', border: '1px solid rgb(127, 140, 170)' }}
               onClick={handleSearch}
             >
@@ -761,6 +800,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                         </div>
                         <div className="text-white font-semibold text-sm">
                           ₹{order.amount} {order.currency}
+                        </div>
+                        <div className="text-gray-400 text-xs mt-1">
+                          Payment: {order.paymentMethod === 'upi' ? 'UPI' : order.paymentMethod === 'wallet' ? 'Wallet' : order.paymentMethod?.toUpperCase() || 'N/A'}
                         </div>
                       </div>
                       
@@ -956,6 +998,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payment Method</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
                       <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
@@ -980,6 +1023,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                       </div>
                       <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                         ₹{selectedOrder.amount} {selectedOrder.currency}
+                      </div>
+                      <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                        {selectedOrder.paymentMethod === 'upi' ? 'UPI' : selectedOrder.paymentMethod === 'wallet' ? 'Wallet' : selectedOrder.paymentMethod?.toUpperCase() || 'N/A'}
                       </div>
                       <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                         {descriptionData.playerId}
