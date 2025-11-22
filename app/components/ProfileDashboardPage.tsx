@@ -204,7 +204,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen relative overflow-hidden p-0 m-0 w-full" style={{ backgroundColor: '#232426' }}>
       {/* Top Section with Logo */}
       <div className="relative z-10">
         <TopSection showLogo={true} />

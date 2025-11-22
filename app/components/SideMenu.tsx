@@ -14,7 +14,7 @@ interface SideMenuProps {
 const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, onNavigate }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -201,46 +201,71 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, onNavigate }) => {
         </div>
 
         {/* Menu Items */}
-        <div className="py-4">
-          {menuItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={() => handleMenuItemClick(item.path)}
-              className={`w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-700 transition-all duration-200 ease-in-out transform hover:scale-[1.02]`}
-              style={{
-                animationDelay: `${index * 50}ms`,
-                animation: isOpen ? `slideInFromLeft 0.3s ease-out forwards` : 'none',
-                backgroundColor: item.isActive ? '#7F8CAA' : 'transparent'
-              }}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="text-white">
-                  {item.icon}
+        <div className="py-4 flex flex-col h-full">
+          <div className="flex-1">
+            {menuItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => handleMenuItemClick(item.path)}
+                className={`w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-700 transition-all duration-200 ease-in-out transform hover:scale-[1.02]`}
+                style={{
+                  animationDelay: `${index * 50}ms`,
+                  animation: isOpen ? `slideInFromLeft 0.3s ease-out forwards` : 'none',
+                  backgroundColor: item.isActive ? '#7F8CAA' : 'transparent'
+                }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="text-white">
+                    {item.icon}
+                  </div>
+                  <span className="text-white font-medium">{item.label}</span>
                 </div>
-                <span className="text-white font-medium">{item.label}</span>
-              </div>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          ))}
-        </div>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            ))}
+          </div>
 
-        {/* Log Out Button */}
-        <div className="absolute bottom-6 left-6 right-6">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 border-white text-white font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:bg-white hover:text-gray-800"
-            style={{
-              animationDelay: `${menuItems.length * 50}ms`,
-              animation: isOpen ? `slideInFromLeft 0.3s ease-out forwards` : 'none'
-            }}
-          >
-            <span>Log Out</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
+          {/* Login/Logout Button - Always at the bottom, independent of menu items */}
+          <div className="mt-auto pb-6 px-6">
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 border-white text-white font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:bg-white hover:text-gray-800"
+                style={{
+                  animationDelay: '600ms',
+                  animation: isOpen ? `slideInFromLeft 0.3s ease-out forwards` : 'none'
+                }}
+              >
+                <span>Log Out</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  onClose();
+                  if (onNavigate) {
+                    onNavigate('login');
+                  } else {
+                    router.push('/login');
+                  }
+                }}
+                className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 border-white text-white font-medium transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:bg-white hover:text-gray-800"
+                style={{
+                  animationDelay: '600ms',
+                  animation: isOpen ? `slideInFromLeft 0.3s ease-out forwards` : 'none'
+                }}
+              >
+                <span>Log In</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </>

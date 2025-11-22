@@ -392,7 +392,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Top Color Effect */}
         <div
           className="absolute top-0 left-0 right-0 h-32 z-0"

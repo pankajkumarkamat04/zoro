@@ -14,7 +14,7 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Top Section with Logo */}
         <div className="relative z-10">
           <TopSection showLogo={true} />

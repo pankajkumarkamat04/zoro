@@ -123,7 +123,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0 bg-[#232426]">
       {/* Desktop Container */}
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Top Section & Welcome Section */}
         <div className="px-4 md:px-6 lg:px-8 relative">
         {/* Top Color Effect */}
