@@ -15,8 +15,11 @@ export default function AuthChecker({ children }: AuthCheckerProps) {
 
   useEffect(() => {
     const checkAuthentication = async () => {
+      // Check if we have a token in Redux state or localStorage
+      const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('authToken') : null);
+      
       // Only check auth if we have a token but haven't verified it yet
-      if (token && !isAuthenticated) {
+      if (authToken && !isAuthenticated) {
         dispatch(checkAuthStart());
 
         try {
@@ -37,7 +40,8 @@ export default function AuthChecker({ children }: AuthCheckerProps) {
   }, [token, isAuthenticated, dispatch]);
 
   // Show loading spinner while checking authentication
-  if (token && isLoading) {
+  const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('authToken') : null);
+  if (authToken && isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
         <div className="text-center">

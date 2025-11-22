@@ -285,7 +285,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
         return;
       }
 
-      // Build query parameters for ledger API
+      // Build query parameters for wallet ledger API
       const queryParams = new URLSearchParams({
         page: walletPagination.page.toString(),
         limit: walletPagination.limit.toString()
@@ -298,7 +298,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       queryParams.append('startDate', startOfMonth.toISOString());
       queryParams.append('endDate', endOfMonth.toISOString());
 
-      const response = await apiClient.get(`/order/history?${queryParams.toString()}`);
+      const response = await apiClient.get(`/wallet/ledger?${queryParams.toString()}`);
       const data: LedgerResponse = response.data;
       
       if (data.success && data.data) {

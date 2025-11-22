@@ -8,10 +8,11 @@ import { GiShoppingBag } from 'react-icons/gi';
 import { MdBarChart } from 'react-icons/md';
 import { BsFillSendFill } from 'react-icons/bs';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
-import { logout } from '@/lib/store/authSlice';
+import { logout, initializeAuth } from '@/lib/store/authSlice';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import SideMenu from './SideMenu';
+import AuthChecker from './AuthChecker';
 
 interface DashboardPageProps {
   onNavigate?: (screen: string) => void;
@@ -50,12 +51,20 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const [gamesLoading, setGamesLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Initialize auth from localStorage on mount
+  useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
+
   useEffect(() => {
     // Always fetch games (public data)
     fetchGames();
     
-    // Only fetch user data if authenticated
-    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
+    // Check for token in Redux state or localStorage
+    const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('authToken') : null);
+    
+    // Only fetch user data if authenticated or if we have a token (might be verifying)
+    if (isAuthenticated || authToken) {
       fetchDashboardData();
     } else {
       // Set fallback data if not authenticated
@@ -120,7 +129,11 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
     { icon: '✈️', label: 'Whatsapp Us' }
   ];
 
-  return (
+  // Check if we have a token but haven't verified auth yet - use AuthChecker
+  const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('authToken') : null);
+  const needsAuthCheck = authToken && !isAuthenticated;
+
+  const dashboardContent = (
     <div className="min-h-screen relative overflow-hidden p-0 m-0 bg-[#232426]">
       {/* Desktop Container */}
       <div className="w-full">
@@ -436,6 +449,12 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
         <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} onNavigate={onNavigate} />
       </div>
     </div>
-
   );
+
+  // Wrap with AuthChecker if we need to verify auth
+  if (needsAuthCheck) {
+    return <AuthChecker>{dashboardContent}</AuthChecker>;
+  }
+
+  return dashboardContent;
 }
