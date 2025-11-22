@@ -21,6 +21,7 @@ interface Order {
   userId: string;
   orderType: string;
   orderId: string;
+  gameName?: string;
   amount: number;
   currency: string;
   status: string;
@@ -164,6 +165,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedWalletTransaction, setSelectedWalletTransaction] = useState<WalletTransaction | null>(null);
   const [showWalletDetails, setShowWalletDetails] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentTransaction | null>(null);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
   const [walletPagination, setWalletPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
@@ -231,7 +234,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
 
   // Prevent body scroll when popup is open
   useEffect(() => {
-    if (showOrderDetails || showWalletDetails) {
+    if (showOrderDetails || showWalletDetails || showPaymentDetails) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -241,7 +244,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showOrderDetails, showWalletDetails]);
+  }, [showOrderDetails, showWalletDetails, showPaymentDetails]);
 
   const fetchOrderHistory = async () => {
     try {
@@ -431,6 +434,11 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
   const handleWalletTransactionClick = (transaction: WalletTransaction) => {
     setSelectedWalletTransaction(transaction);
     setShowWalletDetails(true);
+  };
+
+  const handlePaymentClick = (payment: PaymentTransaction) => {
+    setSelectedPayment(payment);
+    setShowPaymentDetails(true);
   };
 
   // Only show loading screen if user is not authenticated yet
@@ -748,8 +756,11 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                         <div className="text-white text-sm mb-1">
                           {orderItem?.itemName || 'N/A'}
                         </div>
-                        <div className="text-gray-300 text-xs">
+                        <div className="text-gray-300 text-xs mb-1">
                           {formatDate(order.createdAt)}
+                        </div>
+                        <div className="text-white font-semibold text-sm">
+                          ₹{order.amount} {order.currency}
                         </div>
                       </div>
                       
@@ -845,49 +856,38 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                 return (
                   <div 
                     key={payment.id}
-                    className="p-4 rounded-lg"
-                    style={{ 
-                      background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
-                      boxShadow: '0px 4px 4px 0px #00000040'
-                    }}
+                    className="p-3 rounded-lg cursor-pointer transition-opacity hover:opacity-90"
+                    style={{ background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)' }}
+                    onClick={() => handlePaymentClick(payment)}
                   >
-                    <div className="flex flex-wrap">
-                      {/* Left Column - Labels */}
-                      <div className="space-y-3 shrink-0" style={{ width: '120px', minWidth: '120px' }}>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payment Date</div>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Transaction ID</div>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payment Method</div>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Description</div>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Amount</div>
-                        <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
+                    <div className="flex items-center gap-4">
+                      {/* Payment Icon */}
+                      <div className="w-12 h-12 rounded-full bg-gray-300 shrink-0 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                          <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                        </svg>
                       </div>
-
-                      {/* Vertical Divider */}
-                      <div className="w-px bg-white mx-4 shrink-0"></div>
-
-                      {/* Right Column - Values */}
-                      <div className="flex-1 space-y-3 min-w-0">
-                        <div className="text-green-400 text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
-                          {formatDate(payment.date)}
-                        </div>
-                        <div className="text-blue-400 text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-all', overflowWrap: 'break-word' }}>
-                          {payment.transactionId}
-                        </div>
-                        <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
-                          {payment.method}
-                        </div>
-                        <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
-                          {payment.description}
-                        </div>
-                        <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
-                          ₹{payment.amount} INR
-                        </div>
-                        <div 
-                          className={`text-sm font-medium break-words ${payment.status === 'success' ? 'text-green-400' : payment.status === 'pending' ? 'text-pink-400' : 'text-red-400'}`}
-                          style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}
-                        >
+                      
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className={`font-bold text-base mb-1 ${payment.status === 'success' ? 'text-green-400' : payment.status === 'pending' ? 'text-pink-400' : 'text-red-400'}`}>
                           {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                         </div>
+                        <div className="text-white text-sm mb-1 truncate">
+                          {payment.description || payment.method}
+                        </div>
+                        <div className="text-gray-300 text-xs">
+                          {formatDate(payment.date)}
+                        </div>
+                        <div className="text-blue-400 text-xs mt-1 truncate">
+                          {payment.transactionId}
+                        </div>
+                      </div>
+                      
+                      {/* Amount */}
+                      <div className="text-white font-bold text-base shrink-0">
+                        ₹{payment.amount}
                       </div>
                     </div>
                   </div>
@@ -976,7 +976,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                         {selectedOrder.items[0]?.itemName || 'N/A'}
                       </div>
                       <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                        {selectedOrder.items[0]?.itemName || 'N/A'}
+                        {selectedOrder.gameName || 'N/A'}
                       </div>
                       <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                         ₹{selectedOrder.amount} {selectedOrder.currency}
@@ -1087,6 +1087,109 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
                     >
                       {selectedWalletTransaction.status.charAt(0).toUpperCase() + selectedWalletTransaction.status.slice(1)}
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Payment Transaction Details Popup */}
+      {showPaymentDetails && selectedPayment && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 z-50"
+            style={{ background: '#000000cc' }}
+            onClick={() => setShowPaymentDetails(false)}
+          />
+          
+          {/* Popup from Bottom */}
+          <div className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-50 max-h-[70vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out', backgroundColor: 'rgb(35, 36, 38)' }}>
+            {/* Top Color Effect */}
+            <div 
+              className="sticky top-0 left-0 right-0 h-10 pointer-events-none z-10"
+              style={{ 
+                background: 'linear-gradient(180deg, rgba(127, 140, 170, 0.3) 0%, transparent 100%)'
+              }}
+            />
+            <div className="p-4">
+              {/* Header */}
+              <div className="flex items-center mb-4">
+                <button 
+                  onClick={() => setShowPaymentDetails(false)}
+                  className="p-2 rounded-full"
+                >
+                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <h2 className="flex-1 text-center font-bold text-xl text-white">Payment Details</h2>
+                <div className="w-10"></div>
+              </div>
+
+              {/* Payment Details Box */}
+              <div 
+                className="p-4 rounded-lg mb-4"
+                style={{ 
+                  background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
+                  boxShadow: '0px 4px 4px 0px #00000040'
+                }}
+              >
+                <div className="flex">
+                  {/* Left Column - Labels */}
+                  <div className="space-y-3" style={{ width: '120px' }}>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payment Date</div>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Transaction ID</div>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payment Method</div>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Description</div>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Amount</div>
+                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
+                    {selectedPayment.orderId && (
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
+                    )}
+                    {selectedPayment.payerUpi && (
+                      <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Payer UPI</div>
+                    )}
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div className="w-px bg-white mx-4"></div>
+
+                  {/* Right Column - Values */}
+                  <div className="flex-1 space-y-3">
+                    <div className="text-green-400 text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                      {formatDate(selectedPayment.date)}
+                    </div>
+                    <div className="text-blue-400 text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-all', overflowWrap: 'break-word' }}>
+                      {selectedPayment.transactionId}
+                    </div>
+                    <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                      {selectedPayment.method}
+                    </div>
+                    <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                      {selectedPayment.description}
+                    </div>
+                    <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                      ₹{selectedPayment.amount} INR
+                    </div>
+                    <div 
+                      className={`text-sm font-medium break-words ${selectedPayment.status === 'success' ? 'text-green-400' : selectedPayment.status === 'pending' ? 'text-pink-400' : 'text-red-400'}`}
+                      style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}
+                    >
+                      {selectedPayment.status.charAt(0).toUpperCase() + selectedPayment.status.slice(1)}
+                    </div>
+                    {selectedPayment.orderId && (
+                      <div className="text-blue-400 text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                        {selectedPayment.orderId}
+                      </div>
+                    )}
+                    {selectedPayment.payerUpi && (
+                      <div className="text-white text-sm break-words" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '120%', letterSpacing: '0%', wordBreak: 'break-word' }}>
+                        {selectedPayment.payerUpi}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

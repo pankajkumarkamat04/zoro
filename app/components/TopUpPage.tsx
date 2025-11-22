@@ -60,8 +60,9 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
   
   useEffect(() => {
     if (gameId) {
@@ -225,12 +226,32 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const responseData = response.data;
       
       if (responseData.success) {
-        setGameData(responseData.gameData);
+        const gameDataValue = responseData.gameData;
+        setGameData(gameDataValue);
         setDiamondPacks(responseData.diamondPacks);
         
-        // Extract unique categories from diamond packs
-        const categories = ['All', ...Array.from(new Set(responseData.diamondPacks.map((pack: any) => pack.category).filter(Boolean))) as string[]];
+        // Extract unique categories from diamond packs (excluding "All")
+        const categories = Array.from(new Set(responseData.diamondPacks.map((pack: any) => pack.category).filter(Boolean))) as string[];
         setAllCategories(categories);
+        
+        // Set the first category as default if available and no category is selected
+        if (categories.length > 0) {
+          setSelectedCategory(prev => prev || categories[0]);
+        }
+        
+        // Get the most used product image for each category
+        const images: Record<string, string> = {};
+        categories.forEach((category) => {
+          // Find all packs in this category
+          const categoryPacks = responseData.diamondPacks.filter((pack: any) => pack.category === category);
+          if (categoryPacks.length > 0) {
+            // Use the first pack's logo/image as the category image
+            // You can change this logic to find the "most used" pack if needed
+            const firstPack = categoryPacks[0];
+            images[category] = firstPack.logo || firstPack.image || gameDataValue?.image || '';
+          }
+        });
+        setCategoryImages(images);
       }
     } catch (error) {
       console.error('Error fetching diamond packs:', error);
@@ -358,9 +379,9 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   };
 
   // Filter diamond packs by selected category
-  const filteredDiamondPacks = selectedCategory === 'All' 
-    ? diamondPacks 
-    : diamondPacks.filter(pack => pack.category === selectedCategory);
+  const filteredDiamondPacks = selectedCategory 
+    ? diamondPacks.filter(pack => pack.category === selectedCategory)
+    : diamondPacks;
 
   if (isLoading) {
     return (
@@ -526,25 +547,68 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
-        {/* Filter Buttons */}
+        {/* Category Cards - Square Design */}
         {allCategories.length > 0 && (
-          <div className="flex flex-nowrap gap-2 mb-6 overflow-x-auto">
-            {allCategories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setSelectedCategory(category)}
-                className="rounded-lg text-xs sm:text-sm font-medium flex items-center text-white whitespace-nowrap shrink-0"
-                style={{
-                  background: selectedCategory === category ? 'rgb(75, 85, 99)' : 'rgb(35, 36, 38)',
-                  border: '1px solid rgb(127, 140, 170)',
-                  padding: '8px 12px',
-                  borderRadius: '25px'
-                }}
-              >
-                {category}
-              </button>
-            ))}
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+            {allCategories.map((category) => {
+              const isSelected = selectedCategory === category;
+              const categoryImage = categoryImages[category];
+              
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setSelectedCategory(category)}
+                  className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center p-2"
+                  style={{
+                    background: isSelected 
+                      ? 'linear-gradient(135deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)' 
+                      : 'linear-gradient(135deg, rgb(35, 36, 38) 0%, rgb(54, 59, 72) 100%)',
+                    border: isSelected ? '2px solid rgb(127, 140, 170)' : '2px solid rgb(75, 85, 99)',
+                    boxShadow: isSelected ? '0px 4px 8px rgba(127, 140, 170, 0.3)' : '0px 2px 4px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  {/* Category Image as Element */}
+                  {categoryImage ? (
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-1 relative flex-shrink-0">
+                      <Image
+                        src={categoryImage}
+                        alt={category}
+                        fill
+                        className="object-contain"
+                        style={{ filter: isSelected ? 'none' : 'grayscale(30%)' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-1 flex items-center justify-center bg-gray-600 rounded-lg">
+                      <svg className="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 3a2 2 0 100 4 2 2 0 000-4zM5.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 005.5 1zM9 3a2 2 0 100 4 2 2 0 000-4zM10.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0010.5 1zM15 3a2 2 0 100 4 2 2 0 000-4zM16.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0016.5 1zM3 8a2 2 0 012-2h10a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                      </svg>
+                    </div>
+                  )}
+                  
+                  {/* Category Name */}
+                  <div className="text-center mt-auto">
+                    <span 
+                      className="text-white font-bold text-xs sm:text-sm leading-tight"
+                      style={{
+                        textShadow: '0px 2px 4px rgba(0, 0, 0, 0.8)',
+                        lineHeight: '1.2'
+                      }}
+                    >
+                      {category}
+                    </span>
+                  </div>
+                  
+                  {/* Selected Indicator */}
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
 

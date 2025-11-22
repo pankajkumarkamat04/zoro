@@ -17,14 +17,28 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit OTP
   const [loginData, setLoginData] = useState<{email: string, isPhoneLogin: boolean} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    // Reset loading state on mount
+    setIsLoading(false);
+    
     // Get login data from localStorage
     const storedData = localStorage.getItem('loginData');
     if (storedData) {
-      setLoginData(JSON.parse(storedData));
+      try {
+        setLoginData(JSON.parse(storedData));
+      } catch (error) {
+        console.error('Error parsing loginData:', error);
+        localStorage.removeItem('loginData');
+        if (onNavigate) {
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
+      }
     } else {
       // If no login data, redirect to login page
       if (onNavigate) {
@@ -33,7 +47,32 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
         router.push('/login');
       }
     }
-  }, [router]);
+    setIsInitializing(false);
+  }, [router, onNavigate]);
+
+  // Handle visibility change (when app comes back from background)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Reset loading state when app becomes visible
+        setIsLoading(false);
+        // Re-check loginData
+        const storedData = localStorage.getItem('loginData');
+        if (storedData) {
+          try {
+            setLoginData(JSON.parse(storedData));
+          } catch (error) {
+            console.error('Error parsing loginData on visibility change:', error);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
@@ -139,6 +178,23 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
       setIsLoading(false);
     }
   };
+
+  // Show loading only during initialization, not when coming back from background
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'rgb(35, 36, 38)' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no loginData after initialization, don't render (will redirect)
+  if (!loginData) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-8 sm:pt-10 px-4 relative overflow-hidden" style={{ backgroundColor: 'rgb(35, 36, 38)' }}>

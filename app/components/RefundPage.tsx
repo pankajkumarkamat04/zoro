@@ -79,6 +79,21 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
               </section>
 
               <section>
+                <div 
+                  className="p-4 rounded-lg mb-4"
+                  style={{ 
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    border: '2px solid rgba(255, 193, 7, 0.5)'
+                  }}
+                >
+                  <h3 className="text-lg font-bold mb-2" style={{ color: '#FFC107' }}>⚠️ Important Refund Notice</h3>
+                  <p className="text-sm leading-relaxed font-semibold">
+                    <strong>All refunds will be credited as CRED Coins only. No money refunds will be provided.</strong> When a refund is approved, the equivalent amount will be added to your Creds Zone wallet balance in CRED Coins, which can be used for future purchases on our platform.
+                  </p>
+                </div>
+              </section>
+
+              <section>
                 <h2 className="text-xl font-bold mb-3">2. Non-Refundable Items</h2>
                 <p className="text-sm leading-relaxed mb-4">
                   The following are not eligible for refunds:
@@ -107,14 +122,12 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
 
               <section>
                 <h2 className="text-xl font-bold mb-3">4. Refund Timeline</h2>
-                <p className="text-sm leading-relaxed">
-                  Refunds are typically processed within 5-7 business days after approval. The time it takes for the refund to appear in your account depends on your payment method:
+                <p className="text-sm leading-relaxed mb-4">
+                  <strong>All approved refunds will be credited as CRED Coins to your Creds Zone wallet balance.</strong> Refunds are typically processed within 5-7 business days after approval. The refunded amount will appear in your wallet as CRED Coins, which can be used for future purchases.
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-sm ml-4 mt-4">
-                  <li>UPI: 1-3 business days</li>
-                  <li>Credit/Debit Cards: 5-7 business days</li>
-                  <li>Wallet Balance: Instant (credited back to your Creds Zone wallet)</li>
-                </ul>
+                <p className="text-sm leading-relaxed mb-4">
+                  <strong>Note:</strong> No money will be refunded to your original payment method (UPI, Credit/Debit Cards, etc.). All refunds are processed exclusively as CRED Coins in your wallet.
+                </p>
               </section>
 
               <section>
