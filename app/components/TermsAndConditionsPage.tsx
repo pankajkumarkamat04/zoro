@@ -68,14 +68,14 @@ export default function TermsAndConditionsPage({ onNavigate }: TermsAndCondition
               <section>
                 <h2 className="text-xl font-bold mb-3">1. Acceptance of Terms</h2>
                 <p className="text-sm leading-relaxed">
-                  By accessing and using Leaf Store (leafstore.in), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our services.
+                  By accessing and using Creds Zone (credszone.com), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our services.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-bold mb-3">2. Service Description</h2>
                 <p className="text-sm leading-relaxed mb-4">
-                  Leaf Store is a digital platform that provides game top-up and recharge services. We facilitate the purchase of in-game currency, items, and subscriptions for various gaming platforms.
+                  Creds Zone is a digital platform that provides game top-up and recharge services. We facilitate the purchase of in-game currency, items, and subscriptions for various gaming platforms.
                 </p>
               </section>
 
@@ -128,14 +128,14 @@ export default function TermsAndConditionsPage({ onNavigate }: TermsAndCondition
               <section>
                 <h2 className="text-xl font-bold mb-3">7. Limitation of Liability</h2>
                 <p className="text-sm leading-relaxed">
-                  Leaf Store shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services. Our total liability shall not exceed the amount you paid for the specific transaction in question.
+                  Creds Zone shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services. Our total liability shall not exceed the amount you paid for the specific transaction in question.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-bold mb-3">8. Intellectual Property</h2>
                 <p className="text-sm leading-relaxed">
-                  All content, logos, and materials on Leaf Store are the property of Leaf Store or its licensors and are protected by copyright and trademark laws.
+                  All content, logos, and materials on Creds Zone are the property of Creds Zone or its licensors and are protected by copyright and trademark laws.
                 </p>
               </section>
 
@@ -153,8 +153,8 @@ export default function TermsAndConditionsPage({ onNavigate }: TermsAndCondition
                 </p>
                 <ul className="list-none space-y-2 text-sm ml-4 mt-4">
                   <li>📱 WhatsApp: <a href="https://wa.me/9863796664" target="_blank" rel="noopener noreferrer" className="underline">+91 9863796664</a></li>
-                  <li>📧 Email: support@leafstore.in</li>
-                  <li>🌐 Website: <a href="https://leafstore.in" target="_blank" rel="noopener noreferrer" className="underline">www.leafstore.in</a></li>
+                  <li>📧 Email: support@credszone.com</li>
+                  <li>🌐 Website: <a href="https://credszone.com" target="_blank" rel="noopener noreferrer" className="underline">www.credszone.com</a></li>
                 </ul>
               </section>
             </div>

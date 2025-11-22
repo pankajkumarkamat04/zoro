@@ -9,6 +9,7 @@ import { MdBarChart } from 'react-icons/md';
 import { BsFillSendFill } from 'react-icons/bs';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
 import { logout } from '@/lib/store/authSlice';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import SideMenu from './SideMenu';
 
@@ -80,20 +81,8 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/dashboard', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        setDashboardData(responseData.data);
-      } else {
-        console.error('Failed to fetch dashboard data');
-      }
+      const response = await apiClient.get('/user/dashboard');
+      setDashboardData(response.data.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     }
@@ -103,20 +92,9 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
   const fetchGames = async () => {
     try {
       setGamesLoading(true);
-      const response = await fetch('https://api.leafstore.in/api/v1/games/get-all', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success && responseData.games) {
-          setGames(responseData.games);
-        }
-      } else {
-        console.error('Failed to fetch games');
+      const response = await apiClient.get('/games/get-all');
+      if (response.data.success && response.data.games) {
+        setGames(response.data.games);
       }
     } catch (error) {
       console.error('Error fetching games:', error);

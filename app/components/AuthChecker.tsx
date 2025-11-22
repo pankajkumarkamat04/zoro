@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks/redux';
 import { checkAuthStart, checkAuthSuccess, checkAuthFailure } from '@/lib/store/authSlice';
+import apiClient from '@/lib/api/axios';
 
 interface AuthCheckerProps {
   children: React.ReactNode;
@@ -19,23 +20,15 @@ export default function AuthChecker({ children }: AuthCheckerProps) {
         dispatch(checkAuthStart());
 
         try {
-          const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (response.ok) {
-            const userData = await response.json();
-            dispatch(checkAuthSuccess(userData));
-          } else {
-            // Token is invalid or expired
-            dispatch(checkAuthFailure('Authentication failed. Please login again.'));
-          }
-        } catch (error) {
-          dispatch(checkAuthFailure('Network error. Please check your connection.'));
+          const response = await apiClient.get('/user/me');
+          const userData = response.data;
+          dispatch(checkAuthSuccess(userData));
+        } catch (error: any) {
+          // Token is invalid or expired
+          const errorMessage = error.response?.status === 401 
+            ? 'Authentication failed. Please login again.'
+            : 'Network error. Please check your connection.';
+          dispatch(checkAuthFailure(errorMessage));
         }
       }
     };

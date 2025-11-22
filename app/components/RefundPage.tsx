@@ -68,7 +68,7 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
               <section>
                 <h2 className="text-xl font-bold mb-3">1. Refund Eligibility</h2>
                 <p className="text-sm leading-relaxed mb-4">
-                  At Leaf Store, we understand that sometimes you may need to request a refund. Refunds are available under the following circumstances:
+                  At Creds Zone, we understand that sometimes you may need to request a refund. Refunds are available under the following circumstances:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-sm ml-4">
                   <li>Failed transactions where payment was deducted but top-up was not completed</li>
@@ -113,7 +113,7 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
                 <ul className="list-disc list-inside space-y-2 text-sm ml-4 mt-4">
                   <li>UPI: 1-3 business days</li>
                   <li>Credit/Debit Cards: 5-7 business days</li>
-                  <li>Wallet Balance: Instant (credited back to your Leaf Store wallet)</li>
+                  <li>Wallet Balance: Instant (credited back to your Creds Zone wallet)</li>
                 </ul>
               </section>
 
@@ -124,8 +124,8 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
                 </p>
                 <ul className="list-none space-y-2 text-sm ml-4 mt-4">
                   <li>📱 WhatsApp: <a href="https://wa.me/9863796664" target="_blank" rel="noopener noreferrer" className="underline">+91 9863796664</a></li>
-                  <li>📧 Email: support@leafstore.in</li>
-                  <li>🌐 Website: <a href="https://leafstore.in" target="_blank" rel="noopener noreferrer" className="underline">www.leafstore.in</a></li>
+                  <li>📧 Email: support@credszone.com</li>
+                  <li>🌐 Website: <a href="https://credszone.com" target="_blank" rel="noopener noreferrer" className="underline">www.credszone.com</a></li>
                 </ul>
               </section>
 

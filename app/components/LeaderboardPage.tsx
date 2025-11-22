@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '@/lib/hooks/redux';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -58,19 +59,8 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/leaderboard', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard data');
-      }
-
-      const data = await response.json();
+      const response = await apiClient.get('/user/leaderboard');
+      const data = response.data;
       setLeaderboardData(data);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);

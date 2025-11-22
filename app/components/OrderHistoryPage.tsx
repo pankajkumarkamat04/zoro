@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/lib/hooks/redux';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -214,19 +215,9 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       // Also fetch dashboard data to get the latest balance
       const fetchDashboardBalance = async () => {
         try {
-          const response = await fetch('https://api.leafstore.in/api/v1/user/dashboard', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (response.ok) {
-            const responseData = await response.json();
-            if (responseData.data?.walletBalance !== undefined) {
-              setWalletBalance(responseData.data.walletBalance);
-            }
+          const response = await apiClient.get('/user/dashboard');
+          if (response.data.data?.walletBalance !== undefined) {
+            setWalletBalance(response.data.data.walletBalance);
           }
         } catch (error) {
           console.error('Error fetching wallet balance:', error);
@@ -276,19 +267,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
         queryParams.append('status', statusFilter);
       }
 
-      const response = await fetch(`https://api.leafstore.in/api/v1/order/history?${queryParams.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch order history');
-      }
-
-      const data = await response.json();
+      const response = await apiClient.get(`/order/history?${queryParams.toString()}`);
+      const data = response.data;
       setOrderData(data);
     } catch (error) {
       console.error('Error fetching order history:', error);
@@ -318,19 +298,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       queryParams.append('startDate', startOfMonth.toISOString());
       queryParams.append('endDate', endOfMonth.toISOString());
 
-      const response = await fetch(`https://api.leafstore.in/api/v1/order/history?${queryParams.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch wallet transactions');
-      }
-
-      const data: LedgerResponse = await response.json();
+      const response = await apiClient.get(`/order/history?${queryParams.toString()}`);
+      const data: LedgerResponse = response.data;
       
       if (data.success && data.data) {
         // Transform ledger transactions to wallet transactions
@@ -377,19 +346,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
         limit: '10'
       });
 
-      const response = await fetch(`https://api.leafstore.in/api/v1/transaction/history?${queryParams.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch payment transactions');
-      }
-
-      const data: TransactionHistoryResponse = await response.json();
+      const response = await apiClient.get(`/transaction/history?${queryParams.toString()}`);
+      const data: TransactionHistoryResponse = response.data;
       
       if (data.success && data.transactions) {
         // Transform transaction response to payment transactions

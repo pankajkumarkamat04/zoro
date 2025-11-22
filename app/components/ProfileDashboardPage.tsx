@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { FiEdit2 } from 'react-icons/fi';
 import { useAppSelector } from '@/lib/hooks/redux';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -62,30 +63,13 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const response = await apiClient.get('/user/me');
+      const userData = response.data;
+      setUserData(userData);
+      setFormData({
+        fullName: userData.name,
+        email: userData.email,
       });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUserData(userData);
-        setFormData({
-          fullName: userData.name,
-          email: userData.email,
-          
-        });
-      } else {
-        console.error('Failed to fetch user data');
-        if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
-      }
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (onNavigate) {
@@ -142,30 +126,24 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       const formData = new FormData();
       formData.append('image', selectedImage);
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/profile-picture', {
-        method: 'POST',
+      const response = await apiClient.post('/user/profile-picture', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
-        body: formData,
       });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        toast.success(responseData.message || 'Profile picture updated successfully!');
-        
-        // Reset image selection
-        setSelectedImage(null);
-        setImagePreview(null);
-        
-        // Refresh user data to show new picture
-        fetchUserData();
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to upload profile picture. Please try again.');
-      }
-    } catch (error) {
-      toast.error('Network error. Please check your connection and try again.');
+      
+      const responseData = response.data;
+      toast.success(responseData.message || 'Profile picture updated successfully!');
+      
+      // Reset image selection
+      setSelectedImage(null);
+      setImagePreview(null);
+      
+      // Refresh user data to show new picture
+      fetchUserData();
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Network error. Please check your connection and try again.';
+      toast.error(errorMessage);
     } finally {
       setIsUploadingPicture(false);
     }
@@ -199,25 +177,13 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         email: formData.email,
       };
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        toast.success(responseData.message || 'Profile updated successfully!');
-        
-        // Refresh user data
-        fetchUserData();
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to update profile. Please try again.');
-      }
+      const response = await apiClient.put('/user/profile', requestBody);
+      const responseData = response.data;
+      
+      toast.success(responseData.message || 'Profile updated successfully!');
+      
+      // Refresh user data
+      fetchUserData();
     } catch (error) {
       toast.error('Network error. Please check your connection and try again.');
     } finally {
@@ -613,7 +579,6 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
 
         {/* Bottom Navigation */}
         <BottomNavigation />
-      </div>
     </div>
   );
 }

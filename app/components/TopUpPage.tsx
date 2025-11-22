@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAppSelector } from '@/lib/hooks/redux';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -100,25 +101,16 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const balanceCandidate =
-          (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
-        if (typeof balanceCandidate === 'number') {
-          setWalletBalance(balanceCandidate);
-        } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
-          setWalletBalance(Number(balanceCandidate));
-        } else {
-          setWalletBalance(0);
-        }
+      const response = await apiClient.get('/user/me');
+      const data = response.data;
+      const balanceCandidate =
+        (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
+      if (typeof balanceCandidate === 'number') {
+        setWalletBalance(balanceCandidate);
+      } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
+        setWalletBalance(Number(balanceCandidate));
+      } else {
+        setWalletBalance(0);
       }
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
@@ -147,7 +139,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         quantity: 1,
         redirectUrl: typeof window !== 'undefined' 
           ? `${window.location.origin}/payment-status`
-          : 'https://leafstore.in/payment-status'
+          : 'https://credszone.com/payment-status'
       };
 
       // Add all validation fields dynamically
@@ -157,30 +149,19 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         });
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success && responseData.transaction?.paymentUrl) {
-          toast.success('Payment request created successfully! Redirecting...');
-          window.location.href = responseData.transaction.paymentUrl;
-        } else {
-          toast.error(responseData.message || 'Failed to create payment request');
-        }
+      const response = await apiClient.post('/order/diamond-pack-upi', requestBody);
+      const responseData = response.data;
+      
+      if (responseData.success && responseData.transaction?.paymentUrl) {
+        toast.success('Payment request created successfully! Redirecting...');
+        window.location.href = responseData.transaction.paymentUrl;
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to process payment');
+        toast.error(responseData.message || 'Failed to create payment request');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing UPI payment:', error);
-      toast.error('An error occurred while processing payment');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -214,35 +195,24 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         });
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success) {
-          toast.success('Payment completed successfully with CRED Coins!');
-          setShowCheckoutPopup(false);
-          if (onNavigate) {
-            onNavigate('home');
-          } else {
-            router.push('/dashboard');
-          }
+      const response = await apiClient.post('/order/diamond-pack', requestBody);
+      const responseData = response.data;
+      
+      if (responseData.success) {
+        toast.success('Payment completed successfully with CRED Coins!');
+        setShowCheckoutPopup(false);
+        if (onNavigate) {
+          onNavigate('home');
         } else {
-          toast.error(responseData.message || 'Failed to process wallet payment');
+          router.push('/dashboard');
         }
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to process payment');
+        toast.error(responseData.message || 'Failed to process wallet payment');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing wallet payment:', error);
-      toast.error('An error occurred while processing payment');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -251,25 +221,16 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const fetchDiamondPacks = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://api.leafstore.in/api/v1/games/${gameId}/diamond-packs`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success) {
-          setGameData(responseData.gameData);
-          setDiamondPacks(responseData.diamondPacks);
-          
-          // Extract unique categories from diamond packs
-          const categories = ['All', ...Array.from(new Set(responseData.diamondPacks.map((pack: any) => pack.category).filter(Boolean))) as string[]];
-          setAllCategories(categories);
-        }
-      } else {
-        console.error('Failed to fetch diamond packs');
+      const response = await apiClient.get(`/games/${gameId}/diamond-packs`);
+      const responseData = response.data;
+      
+      if (responseData.success) {
+        setGameData(responseData.gameData);
+        setDiamondPacks(responseData.diamondPacks);
+        
+        // Extract unique categories from diamond packs
+        const categories = ['All', ...Array.from(new Set(responseData.diamondPacks.map((pack: any) => pack.category).filter(Boolean))) as string[]];
+        setAllCategories(categories);
       }
     } catch (error) {
       console.error('Error fetching diamond packs:', error);
@@ -365,16 +326,8 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         }
       });
 
-      const response = await fetch(`https://api.leafstore.in/api/v1/games/validate-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
+      const response = await apiClient.post('/games/validate-user', requestBody);
+      const responseData = response.data;
         // Check for success using response or valid field
         if (responseData.response || responseData.valid) {
           // Show success message from response
@@ -389,20 +342,16 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
             nickname: nickname,
             server: server
           });
-        } else {
-          // Show error message
-          const errorMsg = responseData.msg || responseData.data?.msg || 'Invalid ID or Server';
-          toast.error(errorMsg);
-          setValidatedInfo(null);
-        }
       } else {
-        const errorData = await response.json();
-        const errorMsg = errorData.msg || errorData.data?.msg || 'Validation failed. Please try again.';
+        // Show error message
+        const errorMsg = responseData.msg || responseData.data?.msg || 'Invalid ID or Server';
         toast.error(errorMsg);
         setValidatedInfo(null);
       }
-    } catch (error) {
-      toast.error('Network error. Please check your connection and try again.');
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.msg || error.response?.data?.data?.msg || error.message || 'Validation failed. Please try again.';
+      toast.error(errorMsg);
+      setValidatedInfo(null);
     } finally {
       setIsValidating(false);
     }

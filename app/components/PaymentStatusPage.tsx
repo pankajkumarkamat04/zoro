@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import apiClient from '@/lib/api/axios';
 import TopSection from './TopSection';
 import BottomNavigation from './BottomNavigation';
 
@@ -51,18 +52,10 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
           return;
         }
 
-        const response = await fetch(
-          `https://api.leafstore.in/api/v1/transaction/status?client_txn_id=${clientTxnId}&txn_id=${txnId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+        const response = await apiClient.get(
+          `/transaction/status?client_txn_id=${clientTxnId}&txn_id=${txnId}`
         );
-
-        const result = await response.json();
+        const result = response.data;
 
         if (result.success && result.data) {
           setTransactionData(result.data);

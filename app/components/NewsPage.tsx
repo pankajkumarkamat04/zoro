@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '@/lib/hooks/redux';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -77,19 +78,8 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/news/list?page=1&limit=20', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch news');
-      }
-
-      const data: NewsResponse = await response.json();
+      const response = await apiClient.get('/news/list?page=1&limit=20');
+      const data: NewsResponse = response.data;
       if (data.success && data.data && data.data.news) {
         setNewsData(data.data.news);
       }

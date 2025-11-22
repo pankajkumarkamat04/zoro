@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { loginSuccess, loginFailure, registerSuccess, registerFailure } from '@/lib/store/authSlice';
+import apiClient from '@/lib/api/axios';
 import FadedCircle from './FadedCircle';
 
 interface OTPVerificationPageProps {
@@ -75,16 +76,8 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
         otp: otpString
       };
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
+      const response = await apiClient.post('/user/verify-otp', requestBody);
+      const responseData = response.data;
         
         if (responseData.requiresRegistration) {
           toast.success('OTP verified. Please complete your registration.');
@@ -138,14 +131,10 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
             }
           }, 1500);
         }
-      } else {
-        const errorData = await response.json();
-        dispatch(loginFailure(errorData.message || 'Invalid OTP. Please try again.'));
-        toast.error(errorData.message || 'Invalid OTP. Please try again.');
-      }
-    } catch (error) {
-      dispatch(loginFailure('Network error. Please check your connection and try again.'));
-      toast.error('Network error. Please check your connection and try again.');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Invalid OTP. Please try again.';
+      dispatch(loginFailure(errorMessage));
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -204,8 +193,6 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
             style={{
               width: '44px',
               height: '48px',
-              // scale up on larger screens
-              ...(typeof window === 'undefined' ? {} : {}),
               borderRadius: '25px',
               backgroundColor: 'rgb(195, 191, 191)',
               border: 'none',
@@ -262,10 +249,9 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
         </button>
       </div>
 
-        {/* Faded Circles */}
-        <FadedCircle top="-50px" left="200px" />
-        <FadedCircle bottom="-50px" right="200px" />
-      </div>
+      {/* Faded Circles */}
+      <FadedCircle top="-50px" left="200px" />
+      <FadedCircle bottom="-50px" right="200px" />
     </div>
   );
 }

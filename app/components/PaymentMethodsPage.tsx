@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 
@@ -39,27 +40,16 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const balanceCandidate =
-          (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
-        if (typeof balanceCandidate === 'number') {
-          setWalletBalance(balanceCandidate);
-        } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
-          setWalletBalance(Number(balanceCandidate));
-        } else {
-          setWalletBalance(0);
-        }
+      const response = await apiClient.get('/user/me');
+      const data = response.data;
+      const balanceCandidate =
+        (data && (data.walletBalance ?? data.user?.walletBalance ?? data.data?.walletBalance ?? data.data?.user?.walletBalance));
+      if (typeof balanceCandidate === 'number') {
+        setWalletBalance(balanceCandidate);
+      } else if (typeof balanceCandidate === 'string' && !isNaN(Number(balanceCandidate))) {
+        setWalletBalance(Number(balanceCandidate));
       } else {
-        console.error('Failed to fetch wallet balance');
+        setWalletBalance(0);
       }
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
@@ -90,7 +80,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         quantity: 1,
         redirectUrl: typeof window !== 'undefined' 
           ? `${window.location.origin}/payment-status`
-          : 'https://leafstore.in/payment-status'
+          : 'https://credszone.com/payment-status'
       };
 
       // Add all validation fields dynamically (exclude standard pack fields)
@@ -101,31 +91,20 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         }
       });
 
-      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack-upi', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success && responseData.transaction?.paymentUrl) {
-          toast.success('Payment request created successfully! Redirecting...');
-          // Redirect to payment URL
-          window.location.href = responseData.transaction.paymentUrl;
-        } else {
-          toast.error(responseData.message || 'Failed to create payment request');
-        }
+      const response = await apiClient.post('/order/diamond-pack-upi', requestBody);
+      const responseData = response.data;
+      
+      if (responseData.success && responseData.transaction?.paymentUrl) {
+        toast.success('Payment request created successfully! Redirecting...');
+        // Redirect to payment URL
+        window.location.href = responseData.transaction.paymentUrl;
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to process payment');
+        toast.error(responseData.message || 'Failed to create payment request');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing UPI payment:', error);
-      toast.error('An error occurred while processing payment');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -160,35 +139,24 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
         }
       });
 
-      const response = await fetch('https://api.leafstore.in/api/v1/order/diamond-pack', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success) {
-          toast.success('Payment completed successfully with CRED Coins!');
-          // Redirect to dashboard since wallet payment doesn't have transaction IDs
-          if (onNavigate) {
-            onNavigate('home');
-          } else {
-            router.push('/dashboard');
-          }
+      const response = await apiClient.post('/order/diamond-pack', requestBody);
+      const responseData = response.data;
+      
+      if (responseData.success) {
+        toast.success('Payment completed successfully with CRED Coins!');
+        // Redirect to dashboard since wallet payment doesn't have transaction IDs
+        if (onNavigate) {
+          onNavigate('home');
         } else {
-          toast.error(responseData.message || 'Failed to process wallet payment');
+          router.push('/dashboard');
         }
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to process payment');
+        toast.error(responseData.message || 'Failed to process wallet payment');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing wallet payment:', error);
-      toast.error('An error occurred while processing payment');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }

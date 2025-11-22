@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { loginStart } from '@/lib/store/authSlice';
+import apiClient from '@/lib/api/axios';
 import FadedCircle from './FadedCircle';
 
 interface LoginPageProps {
@@ -57,15 +58,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         ? { phone: email }
         : { email: email };
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await apiClient.post('/user/send-otp', requestBody);
 
-      if (response.ok) {
+      if (response.data) {
         toast.success('OTP sent successfully! Please check your phone/email.');
         // Store the email/phone for OTP verification page
         localStorage.setItem('loginData', JSON.stringify({
@@ -80,12 +75,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             router.push('/otp-verification');
           }
         }, 1500);
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to send OTP. Please try again.');
       }
-    } catch (error) {
-      toast.error('Network error. Please check your connection and try again.');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

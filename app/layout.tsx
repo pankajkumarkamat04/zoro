@@ -14,7 +14,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Leaf Store | Game Recharge Platform",
+  title: "Creds Zone | Game Recharge Platform",
   description: "Your one-stop destination for game top-ups and recharges. Fast, secure, and reliable platform for gaming greatness.",
   icons: {
     icon: '/logo.png',

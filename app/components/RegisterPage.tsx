@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { registerStart, registerSuccess, registerFailure } from '@/lib/store/authSlice';
+import apiClient from '@/lib/api/axios';
 import FadedCircle from './FadedCircle';
 
 interface RegisterPageProps {
@@ -107,55 +108,42 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
         password: formData.password
       };
 
-      const response = await fetch('https://api.leafstore.in/api/v1/user/complete-registration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        
-        // Dispatch register success action
-        dispatch(registerSuccess({
-          user: responseData.user,
-          token: responseData.token
-        }));
-        
-        // Store only token in localStorage for persistence
-        if (responseData.token) {
-          localStorage.setItem('authToken', responseData.token);
-        }
-        
-        toast.success(responseData.message || 'Registration successful! Welcome to Creds Zone.');
-        
-        // Navigate to intended path or dashboard after successful registration
-        setTimeout(() => {
-          try {
-            const intended = localStorage.getItem('intendedPath');
-            if (intended) {
-              localStorage.removeItem('intendedPath');
-              if (onNavigate) {
-                onNavigate('home');
-              } else {
-                router.push(intended);
-                return;
-              }
-            }
-          } catch {}
-          if (onNavigate) {
-            onNavigate('home');
-          } else {
-            router.push('/dashboard');
-          }
-        }, 1500);
-      } else {
-        const errorData = await response.json();
-        dispatch(registerFailure(errorData.message || 'Registration failed. Please try again.'));
-        toast.error(errorData.message || 'Registration failed. Please try again.');
+      const response = await apiClient.post('/user/complete-registration', requestBody);
+      const responseData = response.data;
+      
+      // Dispatch register success action
+      dispatch(registerSuccess({
+        user: responseData.user,
+        token: responseData.token
+      }));
+      
+      // Store only token in localStorage for persistence
+      if (responseData.token) {
+        localStorage.setItem('authToken', responseData.token);
       }
+      
+      toast.success(responseData.message || 'Registration successful! Welcome to Creds Zone.');
+      
+      // Navigate to intended path or dashboard after successful registration
+      setTimeout(() => {
+        try {
+          const intended = localStorage.getItem('intendedPath');
+          if (intended) {
+            localStorage.removeItem('intendedPath');
+            if (onNavigate) {
+              onNavigate('home');
+            } else {
+              router.push(intended);
+              return;
+            }
+          }
+        } catch {}
+        if (onNavigate) {
+          onNavigate('home');
+        } else {
+          router.push('/dashboard');
+        }
+      }, 1500);
     } catch (error) {
       dispatch(registerFailure('Network error. Please check your connection and try again.'));
       toast.error('Network error. Please check your connection and try again.');

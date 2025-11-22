@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               <section>
                 <h2 className="text-xl font-bold mb-3">1. Introduction</h2>
                 <p className="text-sm leading-relaxed">
-                  At Leaf Store (leafstore.in), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+                  At Creds Zone (credszone.com), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
                 </p>
               </section>
 
@@ -169,8 +169,8 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
                 </p>
                 <ul className="list-none space-y-2 text-sm ml-4 mt-4">
                   <li>📱 WhatsApp: <a href="https://wa.me/9863796664" target="_blank" rel="noopener noreferrer" className="underline">+91 9863796664</a></li>
-                  <li>📧 Email: privacy@leafstore.in</li>
-                  <li>🌐 Website: <a href="https://leafstore.in" target="_blank" rel="noopener noreferrer" className="underline">www.leafstore.in</a></li>
+                  <li>📧 Email: privacy@credszone.com</li>
+                  <li>🌐 Website: <a href="https://credszone.com" target="_blank" rel="noopener noreferrer" className="underline">www.credszone.com</a></li>
                 </ul>
               </section>
             </div>

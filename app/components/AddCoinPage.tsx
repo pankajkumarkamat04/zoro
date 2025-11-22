@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -26,18 +27,10 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
       try {
         const authToken = token || localStorage.getItem('authToken');
         if (!authToken) return;
-        const response = await fetch('https://api.leafstore.in/api/v1/user/me', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (typeof data.walletBalance === 'number') {
-            setWalletBalance(data.walletBalance);
-          }
+        const response = await apiClient.get('/user/me');
+        const data = response.data;
+        if (typeof data.walletBalance === 'number') {
+          setWalletBalance(data.walletBalance);
         }
       } catch {
         // ignore balance fetch errors
@@ -96,33 +89,22 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
         return;
       }
 
-      const response = await fetch('https://api.leafstore.in/api/v1/wallet/add', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: amountNumber,
-          redirectUrl: "https://leafstore.in"
-        }),
+      const response = await apiClient.post('/wallet/add', {
+        amount: amountNumber,
+        redirectUrl: "https://credszone.com"
       });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.success && responseData.transaction?.paymentUrl) {
-          toast.success('Redirecting to payment...');
-          // Redirect to payment URL
-          window.location.href = responseData.transaction.paymentUrl;
-        } else {
-          toast.error('Failed to create payment request');
-        }
+      
+      const responseData = response.data;
+      if (responseData.success && responseData.transaction?.paymentUrl) {
+        toast.success('Redirecting to payment...');
+        // Redirect to payment URL
+        window.location.href = responseData.transaction.paymentUrl;
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Payment request failed');
+        toast.error('Failed to create payment request');
       }
-    } catch (error) {
-      toast.error('Network error. Please check your connection and try again.');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Network error. Please check your connection and try again.';
+      toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
     }
