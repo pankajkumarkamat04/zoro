@@ -80,7 +80,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center pt-8 sm:pt-12 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center pt-4 sm:pt-6 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
       <div className="w-full max-w-md lg:max-w-lg mx-auto">
         {/* Back Button */}
