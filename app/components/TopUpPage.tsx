@@ -739,20 +739,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
               <p className="text-white font-semibold text-xs mb-1">Weekly Pass Notes</p>
               <p className="text-xs"><span className="font-semibold">1.</span> The game account level must reach level 5 in order to purchase the weekly diamond pass.</p>
               <p className="text-xs"><span className="font-semibold">2.</span> A maximum of 10 weekly diamond passes can be purchased within a 70-day period on the third-party platform (the 10-pass count includes passes purchased in-game). Please do not make additional purchases to avoid losses.</p>
-              
-              <div className="mt-3 pt-2 border-t border-gray-600">
-                <p className="text-white font-semibold text-xs mb-1">2x First Recharge Bonus</p>
-                <p className="text-xs mb-1">Total Diamonds received for each level:</p>
-                <ul className="list-disc list-inside space-y-0.5 ml-2 text-xs">
-                  <li>First purchase at the <span className="font-semibold">50 Diamond</span> level: 50 base Diamonds + 50 bonus Diamonds = <span className="text-green-300">100 Diamonds total</span></li>
-                  <li>First purchase at the <span className="font-semibold">150 Diamond</span> level: 150 base Diamonds + 150 bonus Diamonds = <span className="text-green-300">300 Diamonds total</span></li>
-                  <li>First purchase at the <span className="font-semibold">250 Diamond</span> level: 250 base Diamonds + 250 bonus Diamonds = <span className="text-green-300">500 Diamonds total</span></li>
-                  <li>First purchase at the <span className="font-semibold">500 Diamond</span> level: 500 base Diamonds + 500 bonus Diamonds = <span className="text-green-300">1000 Diamonds total</span></li>
-                </ul>
-                <p className="mt-2 text-xs text-gray-400 italic">
-                  For each level, the double Diamonds bonus applies only to your first purchase, regardless of the payment channel or platform.
-                </p>
-              </div>
+              <p className="text-xs"><span className="font-semibold">3.</span> You will receive 80 diamonds on the day of purchase, with the extra 20 diamonds being sent to your Vault, which you need to log in to in order to claim. Additionally, you must log in and access the weekly pass page for 6 consecutive days to claim a total of 120 extra diamonds, with 20 extra diamonds per day. During the 7 days, you will earn a total of 220 diamonds.</p>
             </div>
           ) : null}
         </div>
