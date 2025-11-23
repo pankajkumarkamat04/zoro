@@ -357,21 +357,26 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
               <div 
                 key={index} 
                 className="flex items-center justify-center"
-                style={{ height: '170px' }}
+                style={{ height: '200px' }}
               >
                 <div 
-                  className="pt-10 animate-pulse"
+                  className="pt-12 animate-pulse"
                   style={{ 
                     background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
                     borderRadius: '22px',
-                    height: '130px',
-                    width: '130px'
+                    height: '160px',
+                    width: '150px'
                   }}
                 >
                   <div className="relative mb-6">
                     <div 
-                      className="w-20 h-20 bg-gray-400 rounded-lg mx-auto"
-                      style={{ margin: '-68px auto auto' }}
+                      className="bg-gray-400 rounded-lg mx-auto"
+                      style={{ 
+                        width: '120px',
+                        height: '120px',
+                        margin: '-84px auto auto',
+                        borderRadius: '22px'
+                      }}
                     ></div>
                   </div>
                   <div 
@@ -393,30 +398,31 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
               key={game._id} 
               className="flex items-center justify-center cursor-pointer"
               style={{ 
-                height: '170px'
+                height: '200px'
               }}
               onClick={() => onNavigate ? onNavigate(`topup/${game._id}`) : router.push(`/topup/${game._id}`)}
             >
               <div 
-                className="pt-10"
+                className="pt-12"
                 style={{ 
                   background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
                   borderRadius: '22px',
-                  height: '130px',
-                  width: '130px'
+                  height: '160px',
+                  width: '150px'
                 }}
               >
                 <div className="relative mb-6">
                   <Image
                     src={game.image}
                     alt={game.name}
-                    width={80}
-                    height={80}
-                    className="w-full h-20 object-cover rounded-lg"
+                    width={120}
+                    height={120}
+                    className="w-full object-cover rounded-lg"
                     style={{
                       color: 'transparent',
-                      width: '80px',
-                      margin: '-68px auto auto',
+                      width: '120px',
+                      height: '120px',
+                      margin: '-84px auto auto',
                       border: '1px solid white',
                       borderRadius: '22px'
                     }}

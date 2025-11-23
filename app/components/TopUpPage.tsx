@@ -549,7 +549,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
         {/* Category Cards - Square Design */}
         {allCategories.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-3 md:gap-4 mb-6">
             {allCategories.map((category) => {
               const isSelected = selectedCategory === category;
               const categoryImage = categoryImages[category];
@@ -559,7 +559,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   key={category}
                   type="button"
                   onClick={() => setSelectedCategory(category)}
-                  className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center p-2"
+                  className="relative aspect-square rounded-3xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center p-2"
                   style={{
                     background: isSelected 
                       ? 'linear-gradient(135deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)' 
@@ -570,7 +570,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                 >
                   {/* Category Image as Element */}
                   {categoryImage ? (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-1 relative flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-12 lg:w-10 xl:w-9 mb-1 relative flex-shrink-0">
                       <Image
                         src={categoryImage}
                         alt={category}
@@ -580,7 +580,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                       />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-1 flex items-center justify-center bg-gray-600 rounded-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-12 lg:w-10 xl:w-9 mb-1 flex items-center justify-center bg-gray-600 rounded-lg">
                       <svg className="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 3a2 2 0 100 4 2 2 0 000-4zM5.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 005.5 1zM9 3a2 2 0 100 4 2 2 0 000-4zM10.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0010.5 1zM15 3a2 2 0 100 4 2 2 0 000-4zM16.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0016.5 1zM3 8a2 2 0 012-2h10a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                       </svg>

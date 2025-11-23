@@ -168,9 +168,9 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
           {coinPacks.map((pack, index) => (
             <div 
               key={index}
-              className={`flex flex-col items-center rounded-3xl cursor-pointer transition-all ${
-                pack.amount === '1000' ? 'p-2' : 'p-4'
-              } ${selectedAmount === pack.amount ? 'ring-2 ring-blue-500' : ''}`}
+              className={`flex flex-col items-center rounded-3xl cursor-pointer transition-all p-4 ${
+                selectedAmount === pack.amount ? 'ring-2 ring-blue-500' : ''
+              }`}
               style={{ 
                 background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                 boxShadow: 'rgba(0, 0, 0, 0.25) 0px 4px 4px 0px',
@@ -182,8 +182,8 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
                 <Image
                   src="/coin.png"
                   alt="Coin Pack"
-                  width={pack.amount === '1000' ? 70 : 40}
-                  height={pack.amount === '1000' ? 70 : 40}
+                  width={40}
+                  height={40}
                   className="rounded-full"
                   style={{ color: 'transparent' }}
                 />
