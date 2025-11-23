@@ -547,30 +547,33 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         <div className="px-4 md:px-6 lg:px-8 mb-6">
         <h2 className="text-white font-bold text-base sm:text-lg mb-4">Select Diamond Pack</h2>
 
-        {/* Category Cards - Square Design */}
+        {/* Category Cards - Square Design - Scrollable */}
         {allCategories.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-3 md:gap-4 mb-6">
-            {allCategories.map((category) => {
-              const isSelected = selectedCategory === category;
-              const categoryImage = categoryImages[category];
-              
-              return (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setSelectedCategory(category)}
-                  className="relative aspect-square rounded-3xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center p-2"
-                  style={{
-                    background: isSelected 
-                      ? 'linear-gradient(135deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)' 
-                      : 'linear-gradient(135deg, rgb(35, 36, 38) 0%, rgb(54, 59, 72) 100%)',
-                    border: isSelected ? '2px solid rgb(127, 140, 170)' : '2px solid rgb(75, 85, 99)',
-                    boxShadow: isSelected ? '0px 4px 8px rgba(127, 140, 170, 0.3)' : '0px 2px 4px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
+          <div className="mb-6 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex gap-3 md:gap-4 pb-2" style={{ minWidth: 'max-content' }}>
+              {allCategories.map((category) => {
+                const isSelected = selectedCategory === category;
+                const categoryImage = categoryImages[category];
+                
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setSelectedCategory(category)}
+                    className="relative aspect-square rounded-3xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 flex flex-col items-center justify-start p-2 flex-shrink-0"
+                    style={{
+                      width: '110px',
+                      minWidth: '110px',
+                      background: isSelected 
+                        ? 'linear-gradient(135deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)' 
+                        : 'linear-gradient(135deg, rgb(35, 36, 38) 0%, rgb(54, 59, 72) 100%)',
+                      border: isSelected ? '2px solid rgb(127, 140, 170)' : '2px solid rgb(75, 85, 99)',
+                      boxShadow: isSelected ? '0px 4px 8px rgba(127, 140, 170, 0.3)' : '0px 2px 4px rgba(0, 0, 0, 0.2)'
+                    }}
+                  >
                   {/* Category Image as Element */}
                   {categoryImage ? (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-12 lg:w-10 xl:w-9 mb-1 relative flex-shrink-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-14 lg:w-12 xl:w-12 mb-0.5 relative flex-shrink-0">
                       <Image
                         src={categoryImage}
                         alt={category}
@@ -580,7 +583,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                       />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-12 lg:w-10 xl:w-9 mb-1 flex items-center justify-center bg-gray-600 rounded-lg">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-14 lg:w-12 xl:w-12 mb-0.5 flex items-center justify-center bg-gray-600 rounded-lg">
                       <svg className="w-6 h-6 sm:w-7 sm:h-7 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 3a2 2 0 100 4 2 2 0 000-4zM5.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 005.5 1zM9 3a2 2 0 100 4 2 2 0 000-4zM10.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0010.5 1zM15 3a2 2 0 100 4 2 2 0 000-4zM16.5 1a2.5 2.5 0 00-2.5 2.5v.5h5v-.5A2.5 2.5 0 0016.5 1zM3 8a2 2 0 012-2h10a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                       </svg>
@@ -588,12 +591,15 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   )}
                   
                   {/* Category Name */}
-                  <div className="text-center mt-auto">
+                  <div className="text-center mt-0.5 px-1">
                     <span 
-                      className="text-white font-bold text-xs sm:text-sm leading-tight"
+                      className="text-white font-bold text-xs leading-tight break-words"
                       style={{
                         textShadow: '0px 2px 4px rgba(0, 0, 0, 0.8)',
-                        lineHeight: '1.2'
+                        lineHeight: '1.1',
+                        fontSize: '10px',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word'
                       }}
                     >
                       {category}
@@ -609,6 +615,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                 </button>
               );
             })}
+            </div>
           </div>
         )}
 
@@ -707,6 +714,49 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
           ))}
         </div>
       </div>
+
+      {/* Mobile Legend Note - Show only for 2x First recharge bonus and Weekly Pass categories */}
+      {gameData && 
+       (gameData.name.toLowerCase().includes('mobile legend') || gameData.name.toLowerCase().includes('mobile legends')) &&
+       (selectedCategory === '2x First recharge bonus' || selectedCategory === 'Weekly Pass') && (
+        <div className="px-4 md:px-6 lg:px-8 mb-6 mt-4">
+          {selectedCategory === '2x First recharge bonus' ? (
+            <div className="text-gray-300 text-xs space-y-1" style={{ fontFamily: 'Poppins', lineHeight: '1.4' }}>
+              <p className="text-white font-semibold text-xs mb-1">2x First Recharge Bonus</p>
+              <p className="text-xs">Total Diamonds received for each level:</p>
+              <ul className="list-disc list-inside space-y-0.5 ml-2 text-xs">
+                <li>50 Diamond level: 50 base + 50 bonus = <span className="text-green-300">100 total</span></li>
+                <li>150 Diamond level: 150 base + 150 bonus = <span className="text-green-300">300 total</span></li>
+                <li>250 Diamond level: 250 base + 250 bonus = <span className="text-green-300">500 total</span></li>
+                <li>500 Diamond level: 500 base + 500 bonus = <span className="text-green-300">1000 total</span></li>
+              </ul>
+              <p className="mt-2 text-xs text-gray-400 italic">
+                Double Diamonds bonus applies only to your first purchase, regardless of payment channel or platform.
+              </p>
+            </div>
+          ) : selectedCategory === 'Weekly Pass' ? (
+            <div className="text-gray-300 text-xs space-y-2" style={{ fontFamily: 'Poppins', lineHeight: '1.4' }}>
+              <p className="text-white font-semibold text-xs mb-1">Weekly Pass Notes</p>
+              <p className="text-xs"><span className="font-semibold">1.</span> The game account level must reach level 5 in order to purchase the weekly diamond pass.</p>
+              <p className="text-xs"><span className="font-semibold">2.</span> A maximum of 10 weekly diamond passes can be purchased within a 70-day period on the third-party platform (the 10-pass count includes passes purchased in-game). Please do not make additional purchases to avoid losses.</p>
+              
+              <div className="mt-3 pt-2 border-t border-gray-600">
+                <p className="text-white font-semibold text-xs mb-1">2x First Recharge Bonus</p>
+                <p className="text-xs mb-1">Total Diamonds received for each level:</p>
+                <ul className="list-disc list-inside space-y-0.5 ml-2 text-xs">
+                  <li>First purchase at the <span className="font-semibold">50 Diamond</span> level: 50 base Diamonds + 50 bonus Diamonds = <span className="text-green-300">100 Diamonds total</span></li>
+                  <li>First purchase at the <span className="font-semibold">150 Diamond</span> level: 150 base Diamonds + 150 bonus Diamonds = <span className="text-green-300">300 Diamonds total</span></li>
+                  <li>First purchase at the <span className="font-semibold">250 Diamond</span> level: 250 base Diamonds + 250 bonus Diamonds = <span className="text-green-300">500 Diamonds total</span></li>
+                  <li>First purchase at the <span className="font-semibold">500 Diamond</span> level: 500 base Diamonds + 500 bonus Diamonds = <span className="text-green-300">1000 Diamonds total</span></li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-400 italic">
+                  For each level, the double Diamonds bonus applies only to your first purchase, regardless of the payment channel or platform.
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
 
         {/* Bottom Spacing for Fixed Navigation */}
         <div className="h-15"></div>

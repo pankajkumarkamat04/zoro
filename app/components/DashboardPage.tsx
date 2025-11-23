@@ -356,25 +356,25 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
             Array.from({ length: 6 }).map((_, index) => (
               <div 
                 key={index} 
-                className="flex items-center justify-center"
-                style={{ height: '200px' }}
+                className="flex items-center justify-center mt-4"
+                style={{ height: '160px' }}
               >
                 <div 
-                  className="pt-12 animate-pulse"
+                  className="pt-8 animate-pulse"
                   style={{ 
                     background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
                     borderRadius: '22px',
-                    height: '160px',
+                    height: '130px',
                     width: '150px'
                   }}
                 >
-                  <div className="relative mb-6">
+                  <div className="relative mb-2">
                     <div 
                       className="bg-gray-400 rounded-lg mx-auto"
                       style={{ 
                         width: '120px',
                         height: '120px',
-                        margin: '-84px auto auto',
+                        margin: '-80px auto auto',
                         borderRadius: '22px'
                       }}
                     ></div>
@@ -396,22 +396,22 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
             games.slice(0, 6).map((game, index) => (
             <div 
               key={game._id} 
-              className="flex items-center justify-center cursor-pointer"
+              className="flex items-center justify-center cursor-pointer mt-4"
               style={{ 
-                height: '200px'
+                height: '160px'
               }}
               onClick={() => onNavigate ? onNavigate(`topup/${game._id}`) : router.push(`/topup/${game._id}`)}
             >
               <div 
-                className="pt-12"
+                className="pt-8"
                 style={{ 
                   background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(51, 56, 68) 100%)',
                   borderRadius: '22px',
-                  height: '160px',
+                  height: '130px',
                   width: '150px'
                 }}
               >
-                <div className="relative mb-6">
+                <div className="relative mb-2">
                   <Image
                     src={game.image}
                     alt={game.name}
@@ -422,7 +422,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
                       color: 'transparent',
                       width: '120px',
                       height: '120px',
-                      margin: '-84px auto auto',
+                      margin: '-80px auto auto',
                       border: '1px solid white',
                       borderRadius: '22px'
                     }}
