@@ -14,8 +14,7 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onNavigate }: LoginPageProps) {
-  const [email, setEmail] = useState('');
-  const [isPhoneLogin, setIsPhoneLogin] = useState(false);
+  const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -45,8 +44,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   }, [router, onNavigate]);
 
   const handleLogin = async () => {
-    if (!email.trim()) {
-      toast.error('Please enter your email or phone number');
+    if (!phone.trim()) {
+      toast.error('Please enter your phone number');
       return;
     }
 
@@ -54,18 +53,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     dispatch(loginStart());
 
     try {
-      const requestBody = isPhoneLogin
-        ? { phone: email }
-        : { email: email };
-
-      const response = await apiClient.post('/user/send-otp', requestBody);
+      const response = await apiClient.post('/user/send-otp', { phone: phone });
 
       if (response.data) {
-        toast.success('OTP sent successfully! Please check your phone/email.');
-        // Store the email/phone for OTP verification page
+        toast.success('OTP sent successfully! Please check your phone.');
+        // Store the phone for OTP verification page
         localStorage.setItem('loginData', JSON.stringify({
-          email: email,
-          isPhoneLogin: isPhoneLogin
+          email: phone,
+          isPhoneLogin: true
         }));
         // Navigate after a short delay to show the success toast
         setTimeout(() => {
@@ -85,11 +80,11 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center pt-16 sm:pt-20 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center pt-8 sm:pt-12 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
       <div className="w-full max-w-md lg:max-w-lg mx-auto">
         {/* Back Button */}
-        <div className="w-full mb-4">
+        <div className="w-full mb-3">
           <button
             type="button"
             onClick={() => {
@@ -118,7 +113,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         </div>
 
         {/* Logo */}
-        <div className="flex justify-center mb-6 sm:mb-8">
+        <div className="flex justify-center mb-4 sm:mb-6">
           <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
             <Image
               src="/logo.png"
@@ -131,7 +126,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8 sm:mb-10">
+        <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             <span className="text-white">Creds</span>
             <span className="ml-2" style={{ color: '#7F8CAA' }}>Zone</span>
@@ -152,49 +147,30 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               </div>
             </div>
 
-            {/* Email Input */}
+            {/* Phone Input */}
             <div className="mt-8">
               <div className="flex items-center mb-3">
-                {isPhoneLogin ? (
-                  <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                )}
-                <span className="text-white font-medium">{isPhoneLogin ? 'Phone' : 'Email'}</span>
+                <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                <span className="text-white font-medium">Phone</span>
               </div>
-              <label htmlFor="login-field" className="sr-only">{isPhoneLogin ? 'Phone number' : 'Email address'}</label>
+              <label htmlFor="login-field" className="sr-only">Phone number</label>
               <input
-                type={isPhoneLogin ? "tel" : "email"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={isPhoneLogin ? "enter your phone number" : "enter your email"}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="enter your phone number"
                 id="login-field"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
                 style={{ backgroundColor: '#C3BFBF' }}
               />
             </div>
           </div>
-
-          {/* Alternative Login Option */}
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              className="text-sm sm:text-base hover:opacity-80 transition-colors"
-              style={{ color: '#7F8CAA', fontSize: '20px' }}
-              onClick={() => setIsPhoneLogin(!isPhoneLogin)}
-            >
-              {isPhoneLogin ? 'login with email' : 'login with phone number'}
-            </button>
-          </div>
         </div>
 
         {/* Login Button */}
-        <div className="mt-8 sm:mt-10 w-full">
+        <div className="mt-6 sm:mt-8 w-full">
           <button
             type="button"
             onClick={handleLogin}
