@@ -393,7 +393,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
               </div>
             ))
           ) : (
-            games.slice(0, 6).map((game, index) => (
+            games.map((game, index) => (
             <div 
               key={game._id} 
               className="flex items-center justify-center cursor-pointer mt-4"
