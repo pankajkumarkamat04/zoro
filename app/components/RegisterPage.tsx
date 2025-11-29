@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { registerStart, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import apiClient from '@/lib/api/axios';
@@ -29,13 +28,36 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('loginData');
+      let phonePrefilled = false;
+      let emailPrefilled = false;
+      
       if (stored) {
         const parsed = JSON.parse(stored) as { email: string; isPhoneLogin: boolean };
         setLoginMethod({ isPhoneLogin: parsed.isPhoneLogin });
         if (parsed.isPhoneLogin) {
+          // Prefill phone number from login
           setFormData(prev => ({ ...prev, phone: parsed.email }));
+          phonePrefilled = true;
         } else {
+          // Prefill email from login
           setFormData(prev => ({ ...prev, email: parsed.email }));
+          emailPrefilled = true;
+        }
+      }
+      
+      // Also check if there's a phone number stored separately (fallback)
+      if (!phonePrefilled) {
+        const phoneFromLogin = localStorage.getItem('loginPhone');
+        if (phoneFromLogin) {
+          setFormData(prev => ({ ...prev, phone: phoneFromLogin }));
+        }
+      }
+      
+      // Also check if there's an email stored separately (fallback)
+      if (!emailPrefilled) {
+        const emailFromLogin = localStorage.getItem('loginEmail');
+        if (emailFromLogin) {
+          setFormData(prev => ({ ...prev, email: emailFromLogin }));
         }
       }
     } catch (_) {
@@ -53,29 +75,24 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
   const handleRegister = async () => {
     // Validation
     if (!formData.name.trim()) {
-      toast.error('Please enter your name');
       return;
     }
     if (!loginMethod?.isPhoneLogin) {
       if (!formData.phone.trim()) {
-        toast.error('Please enter your phone number');
         return;
       }
     }
     if (loginMethod?.isPhoneLogin) {
       // phone is prefilled and locked, require email instead
       if (!formData.email.trim()) {
-        toast.error('Please enter your email');
         return;
       }
     } else {
       if (!formData.email.trim()) {
-        toast.error('Please enter your email');
         return;
       }
     }
     if (!formData.password.trim()) {
-      toast.error('Please enter your password');
       return;
     }
 
@@ -83,7 +100,6 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!loginMethod || loginMethod.isPhoneLogin || (!loginMethod && formData.email)) {
       if (!emailRegex.test(formData.email)) {
-        toast.error('Please enter a valid email address');
         return;
       }
     }
@@ -92,7 +108,6 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
     const phoneRegex = /^\d{10}$/;
     if (!loginMethod || !loginMethod.isPhoneLogin) {
       if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
-        toast.error('Please enter a valid 10-digit phone number');
         return;
       }
     }
@@ -122,8 +137,6 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
         localStorage.setItem('authToken', responseData.token);
       }
       
-      toast.success(responseData.message || 'Registration successful! Welcome to Creds Zone.');
-      
       // Navigate to intended path or dashboard after successful registration
       setTimeout(() => {
         try {
@@ -146,7 +159,6 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps = {}) {
       }, 1500);
     } catch (error) {
       dispatch(registerFailure('Network error. Please check your connection and try again.'));
-      toast.error('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

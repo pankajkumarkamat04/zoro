@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { toast } from 'react-toastify';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
@@ -63,13 +62,11 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
     
     // Validation
     if (!amount.trim()) {
-      toast.error('Please select an amount or enter a custom amount');
       return;
     }
 
     const amountNumber = parseInt(amount);
     if (isNaN(amountNumber) || amountNumber < 1) {
-      toast.error('Minimum amount should be 1');
       return;
     }
 
@@ -78,7 +75,6 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
     try {
       const token = localStorage.getItem('authToken');
       if (!token || !isAuthenticated) {
-        toast.error('Please login first to add coins');
         setTimeout(() => {
           if (onNavigate) {
             onNavigate('login');
@@ -91,20 +87,18 @@ export default function AddCoinPage({ onNavigate }: AddCoinPageProps) {
 
       const response = await apiClient.post('/wallet/add', {
         amount: amountNumber,
-        redirectUrl: "https://credszone.com"
+        redirectUrl: typeof window !== 'undefined' 
+          ? `${window.location.origin}/payment-status`
+          : 'https://credszone.com/payment-status'
       });
       
       const responseData = response.data;
       if (responseData.success && responseData.transaction?.paymentUrl) {
-        toast.success('Redirecting to payment...');
         // Redirect to payment URL
         window.location.href = responseData.transaction.paymentUrl;
-      } else {
-        toast.error('Failed to create payment request');
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Network error. Please check your connection and try again.';
-      toast.error(errorMessage);
+      // Error handling without toast
     } finally {
       setIsProcessing(false);
     }

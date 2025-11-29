@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
@@ -64,12 +63,12 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       const token = localStorage.getItem('authToken');
       
       if (!token) {
-        toast.error('Authentication token not found');
+        // toast.error('Authentication token not found');
         return;
       }
 
       if (!packDetails) {
-        toast.error('No pack selected');
+        // toast.error('No pack selected');
         return;
       }
 
@@ -95,16 +94,16 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       const responseData = response.data;
       
       if (responseData.success && responseData.transaction?.paymentUrl) {
-        toast.success('Payment request created successfully! Redirecting...');
+        // toast.success('Payment request created successfully! Redirecting...');
         // Redirect to payment URL
         window.location.href = responseData.transaction.paymentUrl;
       } else {
-        toast.error(responseData.message || 'Failed to create payment request');
+        // toast.error(responseData.message || 'Failed to create payment request');
       }
     } catch (error: any) {
       console.error('Error processing UPI payment:', error);
       const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -116,12 +115,12 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       const token = localStorage.getItem('authToken');
       
       if (!token) {
-        toast.error('Authentication token not found');
+        // toast.error('Authentication token not found');
         return;
       }
 
       if (!packDetails) {
-        toast.error('No pack selected');
+        // toast.error('No pack selected');
         return;
       }
 
@@ -143,7 +142,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
       const responseData = response.data;
       
       if (responseData.success) {
-        toast.success('Payment completed successfully with CRED Coins!');
+        // toast.success('Payment completed successfully with CRED Coins!');
         // Redirect to dashboard since wallet payment doesn't have transaction IDs
         if (onNavigate) {
           onNavigate('home');
@@ -151,12 +150,12 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
           router.push('/dashboard');
         }
       } else {
-        toast.error(responseData.message || 'Failed to process wallet payment');
+        // toast.error(responseData.message || 'Failed to process wallet payment');
       }
     } catch (error: any) {
       console.error('Error processing wallet payment:', error);
       const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -240,7 +239,7 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
             style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'cred-coins' ? '3px solid white' : 'none' }}
             onClick={() => {
               if (packDetails && walletBalance < packDetails.packAmount) {
-                toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
+                // toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
                 return;
               }
               setSelectedPaymentMethod('cred-coins');
@@ -310,19 +309,19 @@ export default function PaymentMethodsPage({ onNavigate }: PaymentMethodsPagePro
           disabled={isProcessingPayment}
           onClick={async () => {
             if (!selectedPaymentMethod) {
-              toast.error('Please select a payment method');
+              // toast.error('Please select a payment method');
               return;
             }
             
             if (selectedPaymentMethod === 'cred-coins') {
               // Check if user has enough coins
               if (!packDetails) {
-                toast.error('No pack selected');
+                // toast.error('No pack selected');
                 return;
               }
               
               if (walletBalance < packDetails.packAmount) {
-                toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
+                // toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${packDetails.packAmount} coins for this pack.`);
                 return;
               }
               

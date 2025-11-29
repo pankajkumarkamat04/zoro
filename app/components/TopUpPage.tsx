@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { useAppSelector } from '@/lib/hooks/redux';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
@@ -124,12 +123,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const token = localStorage.getItem('authToken');
       
       if (!token) {
-        toast.error('Authentication token not found');
+        // toast.error('Authentication token not found');
         return;
       }
 
       if (!selectedPackData) {
-        toast.error('No pack selected');
+        // toast.error('No pack selected');
         return;
       }
 
@@ -154,15 +153,15 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const responseData = response.data;
       
       if (responseData.success && responseData.transaction?.paymentUrl) {
-        toast.success('Payment request created successfully! Redirecting...');
+        // toast.success('Payment request created successfully! Redirecting...');
         window.location.href = responseData.transaction.paymentUrl;
       } else {
-        toast.error(responseData.message || 'Failed to create payment request');
+        // toast.error(responseData.message || 'Failed to create payment request');
       }
     } catch (error: any) {
       console.error('Error processing UPI payment:', error);
       const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -174,12 +173,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const token = localStorage.getItem('authToken');
       
       if (!token) {
-        toast.error('Authentication token not found');
+        // toast.error('Authentication token not found');
         return;
       }
 
       if (!selectedPackData) {
-        toast.error('No pack selected');
+        // toast.error('No pack selected');
         return;
       }
 
@@ -200,7 +199,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const responseData = response.data;
       
       if (responseData.success) {
-        toast.success('Payment completed successfully with CRED Coins!');
+        // toast.success('Payment completed successfully with CRED Coins!');
         setShowCheckoutPopup(false);
         if (onNavigate) {
           onNavigate('home');
@@ -208,12 +207,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
           router.push('/dashboard');
         }
       } else {
-        toast.error(responseData.message || 'Failed to process wallet payment');
+        // toast.error(responseData.message || 'Failed to process wallet payment');
       }
     } catch (error: any) {
       console.error('Error processing wallet payment:', error);
       const errorMessage = error.response?.data?.message || error.message || 'An error occurred while processing payment';
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -308,13 +307,13 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const handleValidate = async () => {
     // Dynamic validation - check all required fields
     if (!gameData || !gameData.validationFields) {
-      toast.error('Game data not loaded');
+      // toast.error('Game data not loaded');
       return;
     }
 
     for (const field of gameData.validationFields) {
       if (!formData[field] || !formData[field].trim()) {
-        toast.error(`Please enter your ${getFieldLabel(field)}`);
+        // toast.error(`Please enter your ${getFieldLabel(field)}`);
         return;
       }
     }
@@ -353,7 +352,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
         if (responseData.response || responseData.valid) {
           // Show success message from response
           const successMsg = responseData.msg || responseData.data?.msg || 'User validated successfully!';
-          toast.success(successMsg);
+          // toast.success(successMsg);
           
           // Set validated info - use top level fields or data fields
           const nickname = responseData.name || responseData.data?.nickname || '';
@@ -366,12 +365,12 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       } else {
         // Show error message
         const errorMsg = responseData.msg || responseData.data?.msg || 'Invalid ID or Server';
-        toast.error(errorMsg);
+        // toast.error(errorMsg);
         setValidatedInfo(null);
       }
     } catch (error: any) {
       const errorMsg = error.response?.data?.msg || error.response?.data?.data?.msg || error.message || 'Validation failed. Please try again.';
-      toast.error(errorMsg);
+      // toast.error(errorMsg);
       setValidatedInfo(null);
     } finally {
       setIsValidating(false);
@@ -634,7 +633,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                 // Check if user is logged in before proceeding
                 const token = localStorage.getItem('authToken');
                 if (!token || !isAuthenticated) {
-                  toast.error('Please login first to checkout');
+                  // toast.error('Please login first to checkout');
                   setTimeout(() => {
                     if (onNavigate) {
                       onNavigate('login');
@@ -647,13 +646,13 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
 
                 // Validate form data before proceeding - dynamic validation
                 if (!gameData || !gameData.validationFields) {
-                  toast.error('Game data not loaded');
+                  // toast.error('Game data not loaded');
                   return;
                 }
 
                 for (const field of gameData.validationFields) {
                   if (!formData[field] || !formData[field].trim()) {
-                    toast.error(`Please enter your ${getFieldLabel(field)}`);
+                    // toast.error(`Please enter your ${getFieldLabel(field)}`);
                     return;
                   }
                 }
@@ -808,7 +807,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                     style={{ background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)', boxShadow: '0px 4px 4px 0px #00000040', border: selectedPaymentMethod === 'cred-coins' ? '3px solid white' : 'none' }}
                     onClick={() => {
                       if (selectedPackData && walletBalance < selectedPackData.packAmount) {
-                        toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
+                        // toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
                         return;
                       }
                       setSelectedPaymentMethod('cred-coins');
@@ -878,18 +877,18 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
                   disabled={isProcessingPayment}
                   onClick={async () => {
                     if (!selectedPaymentMethod) {
-                      toast.error('Please select a payment method');
+                      // toast.error('Please select a payment method');
                       return;
                     }
                     
                     if (selectedPaymentMethod === 'cred-coins') {
                       if (!selectedPackData) {
-                        toast.error('No pack selected');
+                        // toast.error('No pack selected');
                         return;
                       }
                       
                       if (walletBalance < selectedPackData.packAmount) {
-                        toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
+                        // toast.error(`Insufficient coins! You have ${walletBalance} coins but need ${selectedPackData.packAmount} coins for this pack.`);
                         return;
                       }
                       

@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
-import { loginStart } from '@/lib/store/authSlice';
+import { loginStart, loginFailure, clearError } from '@/lib/store/authSlice';
 import apiClient from '@/lib/api/axios';
 import FadedCircle from './FadedCircle';
 
@@ -14,10 +13,23 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onNavigate }: LoginPageProps) {
+  const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone'); // Phone is default
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  // Reset loading state immediately when component mounts (in case user navigates back from OTP page)
+  useEffect(() => {
+    // Reset local loading state immediately
+    setIsLoading(false);
+    
+    // Reset Redux loading state to prevent PublicRoute from showing loading spinner
+    // This ensures that when user navigates back from OTP page, login page is not stuck on loading
+    dispatch(loginFailure(''));
+    dispatch(clearError());
+  }, [dispatch]);
 
   // Handle browser back button - prevent navigation outside app
   useEffect(() => {
@@ -44,8 +56,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   }, [router, onNavigate]);
 
   const handleLogin = async () => {
-    if (!phone.trim()) {
-      toast.error('Please enter your phone number');
+    if (loginMethod === 'phone' && !phone.trim()) {
+      return;
+    }
+    if (loginMethod === 'email' && !email.trim()) {
       return;
     }
 
@@ -53,27 +67,37 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     dispatch(loginStart());
 
     try {
-      const response = await apiClient.post('/user/send-otp', { phone: phone });
+      const requestBody = loginMethod === 'phone' 
+        ? { phone: phone }
+        : { email: email };
+
+      const response = await apiClient.post('/user/send-otp', requestBody);
 
       if (response.data) {
-        toast.success('OTP sent successfully! Please check your phone.');
-        // Store the phone for OTP verification page
+        // Store the login data for OTP verification page
+        const loginValue = loginMethod === 'phone' ? phone : email;
         localStorage.setItem('loginData', JSON.stringify({
-          email: phone,
-          isPhoneLogin: true
+          email: loginValue,
+          isPhoneLogin: loginMethod === 'phone'
         }));
-        // Navigate after a short delay to show the success toast
-        setTimeout(() => {
-          if (onNavigate) {
-            onNavigate('otp-verification');
-          } else {
-            router.push('/otp-verification');
-          }
-        }, 1500);
+        
+        // Store separately for easy retrieval
+        if (loginMethod === 'phone') {
+          localStorage.setItem('loginPhone', phone);
+        } else {
+          localStorage.setItem('loginEmail', email);
+        }
+        
+        // Navigate immediately
+        if (onNavigate) {
+          onNavigate('otp-verification');
+        } else {
+          router.push('/otp-verification');
+        }
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP. Please try again.';
-      toast.error(errorMessage);
+      // Error handling without toast
+      dispatch(loginFailure(error?.response?.data?.message || 'Failed to send OTP'));
     } finally {
       setIsLoading(false);
     }
@@ -147,24 +171,76 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               </div>
             </div>
 
-            {/* Phone Input */}
-            <div className="mt-8">
-              <div className="flex items-center mb-3">
-                <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                </svg>
-                <span className="text-white font-medium">Phone</span>
+            {/* Login Method Toggle */}
+            <div className="mt-8 mb-4">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('phone')}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                    loginMethod === 'phone'
+                      ? 'bg-white text-gray-800'
+                      : 'bg-gray-300 text-gray-600'
+                  }`}
+                >
+                  Phone
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                    loginMethod === 'email'
+                      ? 'bg-white text-gray-800'
+                      : 'bg-gray-300 text-gray-600'
+                  }`}
+                >
+                  Email
+                </button>
               </div>
-              <label htmlFor="login-field" className="sr-only">Phone number</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="enter your phone number"
-                id="login-field"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
-                style={{ backgroundColor: '#C3BFBF' }}
-              />
+            </div>
+
+            {/* Phone/Email Input */}
+            <div>
+              {loginMethod === 'phone' ? (
+                <>
+                  <div className="flex items-center mb-3">
+                    <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                    <span className="text-white font-medium">Phone</span>
+                  </div>
+                  <label htmlFor="login-field" className="sr-only">Phone number</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="enter your phone number"
+                    id="login-field"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+                    style={{ backgroundColor: '#C3BFBF' }}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center mb-3">
+                    <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    <span className="text-white font-medium">Email</span>
+                  </div>
+                  <label htmlFor="login-field" className="sr-only">Email address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="enter your email"
+                    id="login-field"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
+                    style={{ backgroundColor: '#C3BFBF' }}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

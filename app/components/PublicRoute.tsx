@@ -18,14 +18,14 @@ export default function PublicRoute({
   const pathname = usePathname();
 
   useEffect(() => {
-    // Only redirect if we're not on OTP verification page and user is authenticated
-    if (!isLoading && isAuthenticated && pathname !== '/otp-verification') {
+    // Only redirect if we're not on OTP verification or login page and user is authenticated
+    if (!isLoading && isAuthenticated && pathname !== '/otp-verification' && pathname !== '/login') {
       router.push(redirectTo);
     }
   }, [isAuthenticated, isLoading, router, redirectTo, pathname]);
 
-  // Show loading spinner while checking authentication (but not on OTP page)
-  if (isLoading && pathname !== '/otp-verification') {
+  // Show loading spinner while checking authentication (but not on OTP or login page)
+  if (isLoading && pathname !== '/otp-verification' && pathname !== '/login') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
         <div className="text-center">
@@ -36,8 +36,8 @@ export default function PublicRoute({
     );
   }
 
-  // Show nothing while redirecting (but not on OTP page)
-  if (isAuthenticated && pathname !== '/otp-verification') {
+  // Show nothing while redirecting (but not on OTP or login page)
+  if (isAuthenticated && pathname !== '/otp-verification' && pathname !== '/login') {
     return null;
   }
 

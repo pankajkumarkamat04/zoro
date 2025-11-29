@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { loginSuccess, loginFailure, registerSuccess, registerFailure } from '@/lib/store/authSlice';
 import apiClient from '@/lib/api/axios';
@@ -98,12 +97,10 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
   const handleProceed = async () => {
     const otpString = otp.join('');
     if (otpString.length !== 6) {
-      toast.error('Please enter all 6 digits of the OTP');
       return;
     }
 
     if (!loginData) {
-      toast.error('Login data not found. Please try again.');
       return;
     }
 
@@ -119,7 +116,6 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
       const responseData = response.data;
         
         if (responseData.requiresRegistration) {
-          toast.success('OTP verified. Please complete your registration.');
           // Don't store phone number - pass it via Redux or URL params if needed
           // Clear login data from localStorage
           localStorage.removeItem('loginData');
@@ -133,8 +129,6 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
           }, 1500);
         } else {
           // Handle existing user login response
-          toast.success(responseData.message || 'OTP verified successfully! Welcome back.');
-          
           // Dispatch login success action
           dispatch(loginSuccess({
             user: responseData.user,
@@ -173,7 +167,6 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Invalid OTP. Please try again.';
       dispatch(loginFailure(errorMessage));
-      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

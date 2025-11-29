@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 import { FiEdit2 } from 'react-icons/fi';
 import { useAppSelector } from '@/lib/hooks/redux';
 import apiClient from '@/lib/api/axios';
@@ -105,7 +104,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
 
   const handleImageUpload = async () => {
     if (!selectedImage) {
-      toast.error('Please select an image first');
+      // toast.error('Please select an image first');
       return;
     }
 
@@ -133,7 +132,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       });
       
       const responseData = response.data;
-      toast.success(responseData.message || 'Profile picture updated successfully!');
+      // toast.success(responseData.message || 'Profile picture updated successfully!');
       
       // Reset image selection
       setSelectedImage(null);
@@ -143,7 +142,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       fetchUserData();
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Network error. Please check your connection and try again.';
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     } finally {
       setIsUploadingPicture(false);
     }
@@ -152,7 +151,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   const handleUpdate = async () => {
     // Validation - name is required
     if (!formData.fullName.trim()) {
-      toast.error('Please enter your name');
+      // toast.error('Please enter your name');
       return;
     }
 
@@ -180,12 +179,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       const response = await apiClient.put('/user/profile', requestBody);
       const responseData = response.data;
       
-      toast.success(responseData.message || 'Profile updated successfully!');
+      // toast.success(responseData.message || 'Profile updated successfully!');
       
       // Refresh user data
       fetchUserData();
     } catch (error) {
-      toast.error('Network error. Please check your connection and try again.');
+      // toast.error('Network error. Please check your connection and try again.');
     } finally {
       setIsUpdating(false);
     }

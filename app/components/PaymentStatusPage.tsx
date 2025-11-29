@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import apiClient from '@/lib/api/axios';
 import TopSection from './TopSection';
@@ -10,9 +10,11 @@ interface PaymentStatusPageProps {
   onNavigate?: (screen: string) => void;
 }
 
+type TransactionStatus = 'pending' | 'success' | 'failed' | 'cancelled';
+
 interface TransactionData {
   orderId: string;
-  status: string;
+  status: TransactionStatus;
   amount: number;
   utr?: string;
   gatewayType: string;
@@ -30,49 +32,91 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
   const [isLoading, setIsLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const checkPaymentStatus = useCallback(async (clientTxnId: string | null, txnId: string | null) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('checkPaymentStatus called with:', { clientTxnId, txnId });
+
+      // Build query string - use clientTxnId as client_txn_id parameter
+      const queryParams = new URLSearchParams();
+      if (clientTxnId) {
+        // Map clientTxnId variable to client_txn_id API parameter
+        queryParams.append('client_txn_id', clientTxnId);
+      }
+      if (txnId) {
+        queryParams.append('txn_id', txnId);
+      }
+
+      const apiUrl = `/transaction/status?${queryParams.toString()}`;
+      console.log('Calling API:', apiUrl);
+      const response = await apiClient.get(apiUrl);
+      const result = response.data;
+
+      console.log('API Response:', result);
+
+      if (result.success && result.data) {
+        setTransactionData(result.data);
+        setIsSuccess(result.data.status === 'success');
+      } else {
+        setIsSuccess(false);
+        setError('Failed to fetch transaction status');
+      }
+    } catch (error: any) {
+      console.error('Error fetching transaction status:', error);
+      setIsSuccess(false);
+      setError(error?.response?.data?.message || 'Failed to fetch transaction status');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchTransactionStatus = async () => {
-      try {
-        const clientTxnId = searchParams.get('client_txn_id');
-        const txnId = searchParams.get('txn_id');
-
-        if (!clientTxnId || !txnId) {
-          console.error('Missing transaction parameters');
-          setIsSuccess(false);
-          setIsLoading(false);
-          return;
-        }
-
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          console.error('No auth token found');
-          setIsSuccess(false);
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await apiClient.get(
-          `/transaction/status?client_txn_id=${clientTxnId}&txn_id=${txnId}`
-        );
-        const result = response.data;
-
-        if (result.success && result.data) {
-          setTransactionData(result.data);
-          setIsSuccess(result.data.status === 'success');
-        } else {
-          setIsSuccess(false);
-        }
-      } catch (error) {
-        console.error('Error fetching transaction status:', error);
-        setIsSuccess(false);
-      } finally {
-        setIsLoading(false);
+    // Get transaction IDs from URL params inside useEffect
+    // If params has clientTxnId, use it as client_txn_id in API call
+    const getUrlParam = (param: string) => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
       }
+      return null;
     };
 
-    fetchTransactionStatus();
-  }, [searchParams]);
+    // Check for clientTrxId (with lowercase 'x') first, then clientTxnId, then client_txn_id
+    // The payment gateway sends clientTrxId in the URL
+    const clientTxnId = getUrlParam('clientTrxId') ||
+                       searchParams?.get('clientTrxId') ||
+                       getUrlParam('clientTxnId') ||
+                       searchParams?.get('clientTxnId') ||
+                       getUrlParam('client_txn_id') ||
+                       searchParams?.get('client_txn_id');
+    
+    // Check for transactionId (from payment gateway), txnId, then txn_id
+    const txnId = getUrlParam('transactionId') ||
+                  searchParams?.get('transactionId') ||
+                  getUrlParam('txnId') ||
+                  searchParams?.get('txnId') ||
+                  getUrlParam('txn_id') ||
+                  searchParams?.get('txn_id');
+
+    console.log('useEffect - URL params:', { 
+      clientTxnId, 
+      txnId, 
+      searchParams: searchParams?.toString(),
+      windowLocation: typeof window !== 'undefined' ? window.location.search : 'N/A'
+    });
+
+    if (clientTxnId || txnId) {
+      checkPaymentStatus(clientTxnId, txnId);
+    } else {
+      console.error('Missing required parameters: client_txn_id or txn_id');
+      setError('Missing required parameters: client_txn_id or txn_id');
+      setIsLoading(false);
+    }
+  }, [searchParams, checkPaymentStatus]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -99,7 +143,67 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
     );
   }
 
-  const isTransactionSuccess = isSuccess && transactionData?.status === 'success';
+  const getStatusConfig = (status: TransactionStatus | undefined) => {
+    if (!status) return { icon: null, text: 'Unknown Status', bgColor: '#6B7280', textColor: 'text-gray-400' };
+    
+    switch (status) {
+      case 'success':
+        return {
+          icon: (
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          ),
+          text: 'Order Placed Successfully',
+          bgColor: '#20B2AA',
+          textColor: 'text-green-400'
+        };
+      case 'failed':
+        return {
+          icon: (
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ),
+          text: 'Failed To Place Order',
+          bgColor: '#DC2626',
+          textColor: 'text-red-400'
+        };
+      case 'cancelled':
+        return {
+          icon: (
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ),
+          text: 'Order Cancelled',
+          bgColor: '#DC2626',
+          textColor: 'text-red-400'
+        };
+      case 'pending':
+        return {
+          icon: (
+            <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          ),
+          text: 'Order Pending',
+          bgColor: '#F59E0B',
+          textColor: 'text-yellow-400'
+        };
+      default:
+        return {
+          icon: null,
+          text: 'Unknown Status',
+          bgColor: '#6B7280',
+          textColor: 'text-gray-400'
+        };
+    }
+  };
+
+  const statusConfig = getStatusConfig(transactionData?.status);
+  const isTransactionSuccess = transactionData?.status === 'success';
 
   return (
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
@@ -118,28 +222,21 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
           style={{ 
             width: '80px', 
             height: '80px',
-            backgroundColor: isTransactionSuccess ? '#20B2AA' : '#DC2626' 
+            backgroundColor: statusConfig.bgColor
           }}
         >
-          {isTransactionSuccess ? (
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          )}
+          {statusConfig.icon}
         </div>
         
         {/* Status Text */}
         <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl text-center">
-          {isTransactionSuccess ? (
-            <>Order Placed<br />Successfully</>
-          ) : (
-            <>Failed To Place Order</>
-          )}
+          {error ? 'Error' : statusConfig.text}
         </h1>
+        {error && (
+          <p className="text-red-400 text-sm mt-2 text-center px-4">
+            {error}
+          </p>
+        )}
       </div>
 
         {/* Transaction Details Card */}
@@ -192,7 +289,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
                   {transactionData.customerEmail}
                 </div>
                 <div 
-                  className={`text-sm font-medium ${isTransactionSuccess ? 'text-green-400' : 'text-red-400'}`}
+                  className={`text-sm font-medium ${statusConfig.textColor}`}
                   style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
                 >
                   {transactionData.status.charAt(0).toUpperCase() + transactionData.status.slice(1)}
