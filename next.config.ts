@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'backend2.credimi.in',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
   },
 };

@@ -31,7 +31,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
     email: '',
     
   });
-  const [isLoading, setIsLoading] = useState(!isAuthenticated);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -41,15 +41,11 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
     // Only fetch data once authenticated; don't self-redirect (ProtectedRoute handles it)
     if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
       fetchUserData();
-    }
-  }, [isAuthenticated, token]);
-
-  // Update loading state when authentication changes
-  useEffect(() => {
-    if (isAuthenticated) {
+    } else if (!isAuthenticated) {
+      // Reset loading if not authenticated (ProtectedRoute will handle redirect)
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, token]);
 
   const fetchUserData = async () => {
     try {
@@ -190,8 +186,8 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
     }
   };
 
-  // Only show loading screen if user is not authenticated yet
-  if (isLoading && !isAuthenticated) {
+  // Only show loading screen while fetching user data (ProtectedRoute handles auth loading)
+  if (isLoading && isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#232426' }}>
         <div className="text-center">

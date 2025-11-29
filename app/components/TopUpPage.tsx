@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useAppSelector } from '@/lib/hooks/redux';
+import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
+import { updateUser } from '@/lib/store/authSlice';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
@@ -17,6 +18,7 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
   const params = useParams();
   const gameId = params?.gameId as string;
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   
   const [gameData, setGameData] = useState<{
     _id: string;
@@ -199,12 +201,69 @@ export default function TopUpPage({ onNavigate }: TopUpPageProps = {}) {
       const responseData = response.data;
       
       if (responseData.success) {
-        // toast.success('Payment completed successfully with CRED Coins!');
         setShowCheckoutPopup(false);
-        if (onNavigate) {
-          onNavigate('home');
+        
+        // Update wallet balance after successful payment
+        try {
+          const userResponse = await apiClient.get('/user/me');
+          const userData = userResponse.data;
+          const updatedBalance = userData?.walletBalance ?? userData?.user?.walletBalance ?? userData?.data?.walletBalance;
+          if (typeof updatedBalance === 'number') {
+            // Update Redux state
+            dispatch(updateUser({ walletBalance: updatedBalance }));
+            // Update local state
+            setWalletBalance(updatedBalance);
+          } else if (typeof updatedBalance === 'string' && !isNaN(Number(updatedBalance))) {
+            const balanceNum = Number(updatedBalance);
+            dispatch(updateUser({ walletBalance: balanceNum }));
+            setWalletBalance(balanceNum);
+          }
+        } catch (error) {
+          console.error('Error fetching updated wallet balance:', error);
+          // Still proceed with redirect even if balance update fails
+        }
+        
+        // For wallet payments, redirect to order status page using orderId
+        const orderId = responseData.orderId || 
+                       responseData.order?.orderId ||
+                       responseData.data?.orderId ||
+                       responseData.order?._id;
+        
+        if (orderId) {
+          // Redirect to order status page
+          if (onNavigate) {
+            onNavigate('order-status');
+          } else {
+            router.push(`/order-status?orderId=${encodeURIComponent(orderId)}`);
+          }
         } else {
-          router.push('/dashboard');
+          // Fallback: check for transaction IDs and redirect to payment status
+          const transaction = responseData.transaction || responseData.data?.transaction;
+          const clientTxnId = transaction?.clientTxnId || transaction?.client_txn_id || transaction?.clientTrxId;
+          const txnId = transaction?.txnId || transaction?.txn_id || transaction?.transactionId;
+          
+          if (clientTxnId || txnId) {
+            const params = new URLSearchParams();
+            if (clientTxnId) {
+              params.append('clientTxnId', clientTxnId);
+            }
+            if (txnId) {
+              params.append('transactionId', txnId);
+            }
+            
+            if (onNavigate) {
+              onNavigate('payment-status');
+            } else {
+              router.push(`/payment-status?${params.toString()}`);
+            }
+          } else {
+            // Final fallback to dashboard
+            if (onNavigate) {
+              onNavigate('home');
+            } else {
+              router.push('/dashboard');
+            }
+          }
         }
       } else {
         // toast.error(responseData.message || 'Failed to process wallet payment');
